@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.32916.344
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FiniteElementMethod_2Lab", "FiniteElementMethod_2Lab\FiniteElementMethod_2Lab.csproj", "{71388160-E978-4F5E-9E9B-A8EBA1E605F7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{71388160-E978-4F5E-9E9B-A8EBA1E605F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71388160-E978-4F5E-9E9B-A8EBA1E605F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71388160-E978-4F5E-9E9B-A8EBA1E605F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71388160-E978-4F5E-9E9B-A8EBA1E605F7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {967F26D5-F420-40DE-97AB-1AC49F30F2D5}
+	EndGlobalSection
+EndGlobal
