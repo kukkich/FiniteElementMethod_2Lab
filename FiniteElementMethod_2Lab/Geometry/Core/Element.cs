@@ -1,11 +1,13 @@
-﻿namespace FiniteElementMethod_2Lab.Geometry;
+﻿using System;
+using System.Diagnostics;
 
+namespace FiniteElementMethod_2Lab.Geometry.Core;
+
+[DebuggerDisplay("Indexes = [{NodeIndexes[0]}, {NodeIndexes[1]}], MaterialId = {MaterialId}")]
 public readonly struct Element
 {
-    public const int StepsInsideElement = 0;
-    public const int NodesOnBound = StepsInsideElement + 1;
+    public const int NodesOnBound = 1;
     public const int NodesInElement = 2 * NodesOnBound;
-
     public int[] NodeIndexes { get; }
     public int MaterialId { get; }
 
