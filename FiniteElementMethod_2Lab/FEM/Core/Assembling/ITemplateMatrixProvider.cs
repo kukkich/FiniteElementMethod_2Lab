@@ -2,7 +2,7 @@
 
 namespace FiniteElementMethod_2Lab.FEM.Core.Assembling;
 
-public interface ILocalMatrixProvider
+public interface ITemplateMatrixProvider
 {
     public StackAllocMatrix GetMatrix(Element element);
 }

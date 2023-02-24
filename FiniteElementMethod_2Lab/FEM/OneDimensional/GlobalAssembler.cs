@@ -1,4 +1,5 @@
 ﻿using FiniteElementMethod_2Lab.FEM.Core.Assembling;
+using FiniteElementMethod_2Lab.FEM.Core.Parameters;
 using FiniteElementMethod_2Lab.Geometry;
 using SharpMath;
 using SharpMath.Matrices;
@@ -10,9 +11,9 @@ public class GlobalAssembler
 {
     private readonly Grid<double> _grid;
     private readonly IFEMParameterProvider<double> _densityFunctionProvider;
-    private readonly IFEMParameterProvider<double> _diffusionProvider;
-    private readonly ILocalMatrixProvider _massMatrixProvider;
-    private readonly ILocalMatrixProvider _stiffnessMatrixProvider;
+    private readonly IFEMParameterProvider<IFunctionalParameter<double>> _diffusionProvider;
+    private readonly ITemplateMatrixProvider _massTemplateProvider;
+    private readonly ITemplateMatrixProvider _stiffnessTemplateProvider;
     private readonly IMatrixPortraitBuilder<SymmetricSparseMatrix> _matrixPortraitBuilder;
     private readonly ILocalAssembler _localAssembler;
     private readonly IInserter<SymmetricSparseMatrix> _inserter;
@@ -22,10 +23,10 @@ public class GlobalAssembler
     // TODO Имплементировать помеченные интерфейсы 
     public GlobalAssembler(
         Grid<double> grid,
-        IFEMParameterProvider<double> densityFunctionProvider, // TODO 
-        IFEMParameterProvider<double> diffusionProvider, // TODO 
-        ILocalMatrixProvider massMatrixProvider, // TODO 
-        ILocalMatrixProvider stiffnessMatrixProvider, // TODO 
+        IFEMParameterProvider<double> densityFunctionProvider, 
+        IFEMParameterProvider<IFunctionalParameter<double>> diffusionProvider, // TODO 
+        ITemplateMatrixProvider massTemplateProvider, // TODO 
+        ITemplateMatrixProvider stiffnessTemplateProvider, // TODO 
         IMatrixPortraitBuilder<SymmetricSparseMatrix> matrixPortraitBuilder, 
         ILocalAssembler localAssembler, // TODO 
         IInserter<SymmetricSparseMatrix> inserter 
@@ -34,8 +35,8 @@ public class GlobalAssembler
         _grid = grid;
         _densityFunctionProvider = densityFunctionProvider;
         _diffusionProvider = diffusionProvider;
-        _massMatrixProvider = massMatrixProvider;
-        _stiffnessMatrixProvider = stiffnessMatrixProvider;
+        _massTemplateProvider = massTemplateProvider;
+        _stiffnessTemplateProvider = stiffnessTemplateProvider;
         _matrixPortraitBuilder = matrixPortraitBuilder;
         _localAssembler = localAssembler;
         _inserter = inserter;

@@ -1,6 +1,4 @@
-﻿using SharpMath.Vectors;
-
-namespace FiniteElementMethod_2Lab.FEM.Core.Assembling;
+﻿namespace FiniteElementMethod_2Lab.FEM.Core.Assembling;
 
 public interface ILocalAssembler
 {

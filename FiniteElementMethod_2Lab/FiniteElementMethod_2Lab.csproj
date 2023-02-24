@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="FEM\OneDimensional\Assembling\Extensions\" />
+    <Folder Include="FEM\OneDimensional\Materials\" />
     <Folder Include="Geometry\Splitting\" />
   </ItemGroup>
 
