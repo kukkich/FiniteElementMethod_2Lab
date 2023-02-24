@@ -13,21 +13,22 @@ public class GlobalAssembler
     private readonly IFEMParameterProvider<double> _diffusionProvider;
     private readonly ILocalMatrixProvider _massMatrixProvider;
     private readonly ILocalMatrixProvider _stiffnessMatrixProvider;
-    private readonly IMatrixPortraitBuilder<SymmetricSparseMatrix> _matrixBuilder;
+    private readonly IMatrixPortraitBuilder<SymmetricSparseMatrix> _matrixPortraitBuilder;
     private readonly ILocalAssembler _localAssembler;
     private readonly IInserter<SymmetricSparseMatrix> _inserter;
 
     private Equation<SymmetricSparseMatrix> _equation = null!;
 
+    // TODO Имплементировать помеченные интерфейсы 
     public GlobalAssembler(
         Grid<double> grid,
-        IFEMParameterProvider<double> densityFunctionProvider,
-        IFEMParameterProvider<double> diffusionProvider,
-        ILocalMatrixProvider massMatrixProvider,
-        ILocalMatrixProvider stiffnessMatrixProvider,
-        IMatrixPortraitBuilder<SymmetricSparseMatrix> matrixBuilder,
-        ILocalAssembler localAssembler,
-        IInserter<SymmetricSparseMatrix> inserter
+        IFEMParameterProvider<double> densityFunctionProvider, // TODO 
+        IFEMParameterProvider<double> diffusionProvider, // TODO 
+        ILocalMatrixProvider massMatrixProvider, // TODO 
+        ILocalMatrixProvider stiffnessMatrixProvider, // TODO 
+        IMatrixPortraitBuilder<SymmetricSparseMatrix> matrixPortraitBuilder, 
+        ILocalAssembler localAssembler, // TODO 
+        IInserter<SymmetricSparseMatrix> inserter 
     )
     {
         _grid = grid;
@@ -35,14 +36,14 @@ public class GlobalAssembler
         _diffusionProvider = diffusionProvider;
         _massMatrixProvider = massMatrixProvider;
         _stiffnessMatrixProvider = stiffnessMatrixProvider;
-        _matrixBuilder = matrixBuilder;
+        _matrixPortraitBuilder = matrixPortraitBuilder;
         _localAssembler = localAssembler;
         _inserter = inserter;
     }
 
     public GlobalAssembler BuildEquation()
     {
-        SymmetricSparseMatrix globalMatrix = _matrixBuilder.Build(_grid.Elements, _grid.Nodes.Length);
+        SymmetricSparseMatrix globalMatrix = _matrixPortraitBuilder.Build(_grid.Elements, _grid.Nodes.Length);
         _equation = new Equation<SymmetricSparseMatrix>(
             Matrix: globalMatrix,
             Solution: new Vector(new double[globalMatrix.RowIndexes.Length]),
