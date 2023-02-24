@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using FiniteElementMethod_2Lab.Geometry.Core;
+using FiniteElementMethod_2Lab.FEM.Core;
 
 namespace FiniteElementMethod_2Lab.Geometry;
 

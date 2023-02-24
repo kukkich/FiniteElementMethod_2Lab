@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace FiniteElementMethod_2Lab.Geometry.Core;
+namespace FiniteElementMethod_2Lab.FEM.Core;
 
 [DebuggerDisplay("Indexes = [{NodeIndexes[0]}, {NodeIndexes[1]}], MaterialId = {MaterialId}")]
 public readonly struct Element
@@ -15,7 +15,7 @@ public readonly struct Element
     {
         if (nodeIndexes.Length != NodesInElement)
             throw new ArgumentException(nameof(nodeIndexes));
-        
+
         NodeIndexes = nodeIndexes;
         MaterialId = materialId;
     }

@@ -8,8 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="FEMCore\" />
+    <Folder Include="FEM\OneDimensional\Assembling\Extensions\" />
     <Folder Include="Geometry\Splitting\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\C#\Projects\SharpMath\SharpMath\SharpMath.csproj" />
   </ItemGroup>
 
 </Project>
