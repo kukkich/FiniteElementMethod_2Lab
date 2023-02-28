@@ -32,7 +32,7 @@ public class OneDimensionalGridBuilder
 
                 if (i > 0)
                 {
-                    elements[i - 1] = new Element(indexes.ToArray());
+                    elements[i - 1] = new Element(indexes.ToArray(), nodes[i] - nodes[i - 1]);
                     indexes.Dequeue();
                 }
 

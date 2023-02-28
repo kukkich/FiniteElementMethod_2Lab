@@ -4,45 +4,39 @@ using FiniteElementMethod_2Lab.Geometry;
 using SharpMath;
 using SharpMath.Matrices;
 using SharpMath.Vectors;
+using System;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
 
 public class GlobalAssembler
 {
     private readonly Grid<double> _grid;
-    private readonly IFEMParameterProvider<double> _densityFunctionProvider;
-    private readonly IFEMParameterProvider<IFunctionalParameter<double>> _diffusionProvider;
-    private readonly ITemplateMatrixProvider _massTemplateProvider;
-    private readonly ITemplateMatrixProvider _stiffnessTemplateProvider;
+    private readonly IFunctionalParameter<double> _densityFunctionProvider;
+    private readonly IFunctionalParameter<double> _diffusionProvider;
     private readonly IMatrixPortraitBuilder<SymmetricSparseMatrix> _matrixPortraitBuilder;
     private readonly ILocalAssembler _localAssembler;
     private readonly IInserter<SymmetricSparseMatrix> _inserter;
 
     private Equation<SymmetricSparseMatrix> _equation = null!;
-
-    // TODO Имплементировать помеченные интерфейсы 
+    
     public GlobalAssembler(
         Grid<double> grid,
-        IFEMParameterProvider<double> densityFunctionProvider, 
-        IFEMParameterProvider<IFunctionalParameter<double>> diffusionProvider, // TODO 
-        ITemplateMatrixProvider massTemplateProvider, // TODO 
-        ITemplateMatrixProvider stiffnessTemplateProvider, // TODO 
+        IFunctionalParameter<double> densityFunctionProvider, 
+        IFunctionalParameter<double> diffusionProvider,
         IMatrixPortraitBuilder<SymmetricSparseMatrix> matrixPortraitBuilder, 
-        ILocalAssembler localAssembler, // TODO 
+        ILocalAssembler localAssembler, 
         IInserter<SymmetricSparseMatrix> inserter 
     )
     {
         _grid = grid;
         _densityFunctionProvider = densityFunctionProvider;
         _diffusionProvider = diffusionProvider;
-        _massTemplateProvider = massTemplateProvider;
-        _stiffnessTemplateProvider = stiffnessTemplateProvider;
         _matrixPortraitBuilder = matrixPortraitBuilder;
         _localAssembler = localAssembler;
         _inserter = inserter;
     }
 
-    public GlobalAssembler BuildEquation()
+    public Equation<SymmetricSparseMatrix> BuildEquation()
     {
         SymmetricSparseMatrix globalMatrix = _matrixPortraitBuilder.Build(_grid.Elements, _grid.Nodes.Length);
         _equation = new Equation<SymmetricSparseMatrix>(
@@ -60,6 +54,21 @@ public class GlobalAssembler
             _inserter.InsertVector(_equation.RightSide, localRightSide);
         }
 
-        return this;
+        return _equation;
+    }
+
+    public GlobalAssembler ApplyThirdBoundaryConditions()
+    {
+        throw new NotImplementedException();
+    }
+
+    public GlobalAssembler ApplySecondBoundaryConditions()
+    {
+        throw new NotImplementedException();
+    }
+
+    public GlobalAssembler ApplyFirstBoundaryConditions()
+    {
+        throw new NotImplementedException(); 
     }
 }

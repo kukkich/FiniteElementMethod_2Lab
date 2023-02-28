@@ -4,12 +4,12 @@ namespace FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters.Prov
 
 public class MaterialProvider : IMaterialProvider<Material>
 {
-    private readonly IFEMParameterProvider<SolutionDependentParameter> _lambdaProvider;
-    private readonly IFEMParameterProvider<double> _gammaProvider;
+    private readonly IAttachedToElementParameterProvider<SolutionDependentParameter> _lambdaProvider;
+    private readonly IAttachedToElementParameterProvider<double> _gammaProvider;
 
     public MaterialProvider(
-        IFEMParameterProvider<SolutionDependentParameter> lambdaProvider,
-        IFEMParameterProvider<double> gammaProvider
+        IAttachedToElementParameterProvider<SolutionDependentParameter> lambdaProvider,
+        IAttachedToElementParameterProvider<double> gammaProvider
     )
     {
         _lambdaProvider = lambdaProvider;

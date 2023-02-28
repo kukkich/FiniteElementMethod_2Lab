@@ -12,7 +12,7 @@ public class Inserter : IInserter<SymmetricSparseMatrix>
         for (var i = 0; i < vectorLength; i++)
         {
             var row = localVector.IndexPermutation
-                .ApplyPermutation(i);
+                .Apply(i);
             vector[row] += localVector[i];
         }
     }
@@ -23,12 +23,12 @@ public class Inserter : IInserter<SymmetricSparseMatrix>
         for (var i = 0; i < matrixSize; i++)
         {
             var row = localMatrix.IndexPermutation
-                .ApplyPermutation(i);
+                .Apply(i);
 
             for (var j = 0; j < matrixSize; j++)
             {
                 var column = localMatrix.IndexPermutation
-                    .ApplyPermutation(j);
+                    .Apply(j);
                 if (column > row) continue;
 
                 matrix[row, column] += localMatrix[i, j];

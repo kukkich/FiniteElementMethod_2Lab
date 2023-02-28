@@ -2,7 +2,7 @@
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters.Providers;
 
-public class FixedValueProvider : IFEMParameterProvider<double>, IFunctionalParameter<double>
+public class FixedValueProvider : IAttachedToElementParameterProvider<double>, IFunctionalParameter<double>
 {
     private readonly double _value;
 

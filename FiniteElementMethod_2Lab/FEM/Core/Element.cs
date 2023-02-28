@@ -10,13 +10,15 @@ public readonly struct Element
     public const int NodesInElement = 2 * NodesOnBound;
     public int[] NodeIndexes { get; }
     public int MaterialId { get; }
+    public double Length { get; }
 
-    public Element(int[] nodeIndexes, int materialId = 0)
+    public Element(int[] nodeIndexes, double length, int materialId = 0)
     {
         if (nodeIndexes.Length != NodesInElement)
             throw new ArgumentException(nameof(nodeIndexes));
 
         NodeIndexes = nodeIndexes;
+        Length = length;
         MaterialId = materialId;
     }
 
