@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="FEM\OneDimensional\Assembling\Boundary\" />
     <Folder Include="Geometry\Splitting\" />
   </ItemGroup>
 

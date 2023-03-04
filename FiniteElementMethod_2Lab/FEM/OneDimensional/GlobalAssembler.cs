@@ -5,11 +5,19 @@ using SharpMath;
 using SharpMath.Matrices;
 using SharpMath.Vectors;
 using System;
+using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
 
 public class GlobalAssembler
 {
+    private static readonly GaussExcluding GaussExcluder;
+
+    static GlobalAssembler()
+    {
+        GaussExcluder = new GaussExcluding();
+    }
+
     private readonly Grid<double> _grid;
     private readonly IFunctionalParameter<double> _densityFunctionProvider;
     private readonly IFunctionalParameter<double> _diffusionProvider;
@@ -57,7 +65,7 @@ public class GlobalAssembler
         return _equation;
     }
 
-    public GlobalAssembler ApplyThirdBoundaryConditions()
+    public GlobalAssembler ApplyThirdBoundaryConditions(Equation<SymmetricSparseMatrix> equation)
     {
         throw new NotImplementedException();
     }
@@ -67,8 +75,48 @@ public class GlobalAssembler
         throw new NotImplementedException();
     }
 
-    public GlobalAssembler ApplyFirstBoundaryConditions()
+    public GlobalAssembler ApplyFirstBoundaryConditions(Equation<SymmetricSparseMatrix> equation, FixedValue[] conditions)
     {
-        throw new NotImplementedException(); 
+        foreach (var valueCondition in conditions)
+        {
+            GaussExcluder.ExcludeInSymmetric(
+                equation,
+                row: valueCondition.Node,
+                fixedValue: valueCondition.Value
+            );
+        }
+
+        return this;
+    }
+}
+
+public class GaussExcluding
+{
+    public Equation<SymmetricSparseMatrix> ExcludeInSymmetric(Equation<SymmetricSparseMatrix> equation, int row, double fixedValue)
+    {
+        var matrixSize = equation.Matrix.RowIndexes.Length;
+
+        foreach (var indexValue in equation.Matrix[row])
+        {
+            equation.RightSide[indexValue.ColumnIndex] -= indexValue.Value * fixedValue;
+            indexValue.SetValue(0);
+        }
+
+        for (var i = row + 1; i < matrixSize; i++)
+        {
+            var sparseRow = equation.Matrix[i];
+            if (!sparseRow.HasColumn(row))
+            {
+                continue;
+            }
+
+            equation.RightSide[i] -= sparseRow[row] * fixedValue;
+            sparseRow[row] = 0;
+        }
+
+        equation.Matrix.Diagonal[row] = 1d;
+        equation.RightSide[row] = fixedValue;
+
+        return equation;
     }
 }

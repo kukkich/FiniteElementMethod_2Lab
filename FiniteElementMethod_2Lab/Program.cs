@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Xml.Linq;
+using FiniteElementMethod_2Lab.FEM.Core;
 using FiniteElementMethod_2Lab.FEM.OneDimensional;
 using FiniteElementMethod_2Lab.Geometry;
 using FiniteElementMethod_2Lab.Geometry.Core;
@@ -11,34 +13,36 @@ namespace FiniteElementMethod_2Lab;
 
 public class Program
 {
+    private static double[] Time;
+    private static Grid<double> Grid;
+
+    private static Func<double, double, double> U;
+
     static void Main(string[] args)
     {
-        var timeSplit = new AxisSplitParameter(
-            new[] {0d, 10d},
-            new IIntervalSplitter[]
-            {
-                new UniformSplitter(10),
-            });
+        U = (x, t) => 2 - x - x*t;
 
         var xSplit = new AxisSplitParameter(
-            new[] {0d, 1d},
+            new[] { 0d, 2d },
             new IIntervalSplitter[]
             {
-                new UniformSplitter(1),
+                new UniformSplitter(2),
             }
         );
 
         double[] time = new UniformSplitter(10)
-            .EnumerateValues(new Interval(0, 1d))
+            .EnumerateValues(new Interval(0, 3d))
             .ToArray();
 
         var grid = new OneDimensionalGridBuilder()
             .Build(xSplit);
+        Time = time;
+        Grid = grid;
 
         var infrastructure = new FEMInfrastructureBuilder()
             .SetGrid(grid)
             .SetTimeLayers(time)
-            .SetInitialWeights(2d, 2d)
+            .SetInitialWeights(2d, 1d, 0d)
             .SetSLAESolver(() => new SLAESolvingConfiguration
             {
                 PreconditionFactory = new DiagonalPreconditionerFactory(),
@@ -46,8 +50,10 @@ public class Program
                 Precision = 1e-14
             })
             .SetSigma(1)
-            .SetDensityFunction(x => -2d)
+            .SetDensityFunction((x, t) => -1d * x)
             .SetLambdaBySolutionDependency(u => 1d)
+            .SetFirstBoundary(0, t => U(0, t))
+            .SetFirstBoundary(2, t => U(2, t))
             .Build();
 
         while (infrastructure.HasNextTime)
@@ -58,14 +64,30 @@ public class Program
         WriteSolution(infrastructure.CurrentSolution, infrastructure.CurrentTime);
 
 
-        Console.WriteLine("123");
+        //Console.WriteLine("123");
     }
 
     public static void WriteSolution(Vector q, double t)
     {
-        var constant = q[0];
-        var coef = q[1] - q[0];
 
-        Console.WriteLine($"t = {t:F3}    {coef:F3}x + {constant:F3}");
+        var solution = new FiniteElementSolution(Grid, q);
+        Console.WriteLine($"t = {t}");
+
+        Console.Write("x:    ");
+        for (int i = 0; i < 5; i++)
+        {
+            var node = 0 + 0.5d * i; 
+            Console.Write($"{node:F3}  ");
+        }
+
+        Console.WriteLine();
+        Console.Write("u(x): ");
+        for (int i = 0; i < 5; i++)
+        {
+            var node = 0 + 0.5d * i;
+            Console.Write($"{solution.Calculate(node):F3}  ");
+        }
+        Console.WriteLine();
+        Console.WriteLine();
     }
 }

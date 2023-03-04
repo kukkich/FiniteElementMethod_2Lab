@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using FiniteElementMethod_2Lab.FEM.Core.Assembling;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling;
+using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters.Providers;
 using FiniteElementMethod_2Lab.Geometry;
 using SharpMath.EquationsSystem.Solver;
@@ -16,13 +18,14 @@ public class FEMInfrastructureBuilder
     private readonly ITemplateMatrixProvider _massTemplateProvider;
     private readonly ITemplateMatrixProvider _stiffnessTemplateProvider;
     private readonly IInserter<SymmetricSparseMatrix> _inserter;
-    private Func<double, double>? _densityFunction;
+    private Func<double, double, double>? _densityFunction;
     private Func<double, double>? _lambda;
     private double? _sigma;
     private Grid<double>? _grid;
     private double[]? _timeLayers;
     private ConjugateGradientSolver? _SLAESolver;
     private Vector? _initialWeights;
+    private readonly List<FirstBoundary> _firstBoundary = new();
 
     public FEMInfrastructureBuilder()
     {
@@ -56,7 +59,7 @@ public class FEMInfrastructureBuilder
         return this;
     }
 
-    public FEMInfrastructureBuilder SetDensityFunction(Func<double, double> densityFunction)
+    public FEMInfrastructureBuilder SetDensityFunction(Func<double, double, double> densityFunction)
     {
         _densityFunction = densityFunction;
         return this;
@@ -85,11 +88,22 @@ public class FEMInfrastructureBuilder
         return this;
     }
 
+    public FEMInfrastructureBuilder SetFirstBoundary(int nodeIndex, Func<double, double> u)
+    {
+        _firstBoundary.Add(new FirstBoundary
+        {
+            Node = nodeIndex,
+            ValueFromTime = u
+        });
+
+        return this;
+    }
+
     public FEMInfrastructure Build()
     {
         EnsureAllFieldNotNull();
             
-        var densityFunction = new FunctionalProvider(_grid!, _densityFunction!);
+        var densityFunction = new TimeRelatedFunctionalProvider(_grid!, _densityFunction!);
         var sigma = new FixedValueProvider((double)_sigma!);
         if (_initialWeights!.Length != _grid!.Nodes.Length)
             throw new InvalidOperationException();
@@ -105,9 +119,11 @@ public class FEMInfrastructureBuilder
             timeLayers: _timeLayers!,
             SLAESolver: _SLAESolver!,
             initialWeights: _initialWeights,
-            lambda: _lambda!
+            lambda: _lambda!,
+            firstBoundary: _firstBoundary.ToArray()
         );
     }
+
 
     private void EnsureAllFieldNotNull()
     {
@@ -115,5 +131,8 @@ public class FEMInfrastructureBuilder
         foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic))
             if (field.GetValue(this) is null)
                 throw new InvalidOperationException($"field {field.Name} must be initialized");
+
+        if (_firstBoundary.Count > 2)
+            throw new InvalidOperationException();
     }
 }

@@ -1,9 +1,11 @@
 ﻿using SharpMath.EquationsSystem.Solver;
 using System;
+using System.Linq;
 using FiniteElementMethod_2Lab.FEM.Core;
 using SharpMath.Vectors;
 using FiniteElementMethod_2Lab.FEM.Core.Assembling;
 using FiniteElementMethod_2Lab.FEM.Core.Parameters;
+using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
 using FiniteElementMethod_2Lab.Geometry;
 using SharpMath.Matrices;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
@@ -17,7 +19,7 @@ public class FEMInfrastructure
     public Vector CurrentSolution => TimeLayersSolution[_currentTimeLayer];
     public Vector PreviousSolution => TimeLayersSolution[_currentTimeLayer - 1];
     public Vector[] TimeLayersSolution { get; private set; }
-    public bool HasNextTime => _currentTimeLayer < _timeLayers.Length - 1; 
+    public bool HasNextTime => _currentTimeLayer < _timeLayers.Length - 1;
     public double CurrentTime => _timeLayers[_currentTimeLayer];
     public double TimeStep => CurrentTime - _timeLayers[_currentTimeLayer - 1];
 
@@ -29,11 +31,13 @@ public class FEMInfrastructure
     private readonly ITemplateMatrixProvider _stiffnessTemplateProvider;
     private readonly IInserter<SymmetricSparseMatrix> _inserter;
     private readonly Grid<double> _grid;
-    private readonly IFunctionalParameter<double> _densityFunction;
+    private readonly TimeRelatedFunctionalProvider _densityFunction;
     private readonly FixedValueProvider _sigma;
     private readonly ConjugateGradientSolver _SLAESolver;
     private readonly double[] _timeLayers;
     private readonly Func<double, double> _lambda;
+    private readonly FirstBoundary[] _firstBoundary;
+
 
     public FEMInfrastructure(
         IMatrixPortraitBuilder<SymmetricSparseMatrix> matrixPortraitBuilder,
@@ -41,12 +45,13 @@ public class FEMInfrastructure
         ITemplateMatrixProvider stiffnessTemplateProvider,
         IInserter<SymmetricSparseMatrix> inserter,
         Grid<double> grid,
-        IFunctionalParameter<double> densityFunction,
+        TimeRelatedFunctionalProvider densityFunction,
         FixedValueProvider sigma,
         double[] timeLayers,
         ConjugateGradientSolver SLAESolver,
         Vector initialWeights,
-        Func<double, double> lambda
+        Func<double, double> lambda,
+        FirstBoundary[] firstBoundary
         )
     {
         _matrixPortraitBuilder = matrixPortraitBuilder;
@@ -61,18 +66,32 @@ public class FEMInfrastructure
         TimeLayersSolution = new Vector[_timeLayers.Length];
         TimeLayersSolution[0] = initialWeights;
         _lambda = lambda;
+        _firstBoundary = firstBoundary;
     }
 
     public void NextTimeIteration()
     {
         _currentTimeLayer++;
+        _densityFunction.Time = CurrentTime;
         TimeLayersSolution[_currentTimeLayer] = TimeLayersSolution[_currentTimeLayer - 1];
 
         // Сюда поставить цикл
         // Простая итерация/Ньютон
-        var solver = new FiniteElementSolver(GetGlobalAssembler(), _SLAESolver);
-        var weights = solver.Solve();
-        TimeLayersSolution[_currentTimeLayer] = weights;
+        do
+        {
+            var solver = new FiniteElementSolver(
+                GetGlobalAssembler(),
+                _SLAESolver,
+                _firstBoundary.Select(condition => condition.ToFixedValue(CurrentTime))
+                    .ToArray()
+            );
+
+            var weights = solver.Solve();
+            TimeLayersSolution[_currentTimeLayer] = weights;
+        } while (
+            //Условия выхода простой итерации
+            false);
+
     }
 
     private GlobalAssembler GetGlobalAssembler()

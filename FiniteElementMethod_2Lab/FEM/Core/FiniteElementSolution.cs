@@ -34,7 +34,7 @@ public class FiniteElementSolution
         
         var sum = 0d;
         sum += qLeft * (right - point) / step;
-        sum += qRight * (point - right) / step;
+        sum += qRight * (point - left) / step;
 
         return sum;
     }
