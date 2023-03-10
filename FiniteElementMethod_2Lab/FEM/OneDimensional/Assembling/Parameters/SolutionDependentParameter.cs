@@ -29,4 +29,11 @@ public class SolutionDependentParameter : IFunctionalParameter<double>
         
         return _solutionDependency(u);
     }
+
+    public double Calculate(double point)
+    {
+        var u = _solution.Calculate(point);
+
+        return _solutionDependency(u);
+    }
 }

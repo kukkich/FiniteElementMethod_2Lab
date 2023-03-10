@@ -43,6 +43,8 @@ public class LocalAssembler : ILocalAssembler
 
         var resultMatrix = LinAl.Sum(stiffness, mass).AsImmutable();
 
+
+
         return new LocalMatrix(
             resultMatrix,
             new IndexPermutation(element.NodeIndexes)
@@ -97,7 +99,7 @@ public class LocalAssembler : ILocalAssembler
 
             var sigma = _sigma.GetById(element.MaterialId);
             var q = _previousTimeLayerSolution[nodeIndex];
-            var timeImpact = q * sigma / (_timeStep * element.Length);
+            var timeImpact = q * sigma / (_timeStep);
 
             return f + timeImpact;
         });

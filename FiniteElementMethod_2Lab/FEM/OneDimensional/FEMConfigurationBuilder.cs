@@ -102,9 +102,10 @@ public class FEMInfrastructureBuilder
     public FEMInfrastructure Build()
     {
         EnsureAllFieldNotNull();
-            
+        
         var densityFunction = new TimeRelatedFunctionalProvider(_grid!, _densityFunction!);
         var sigma = new FixedValueProvider((double)_sigma!);
+
         if (_initialWeights!.Length != _grid!.Nodes.Length)
             throw new InvalidOperationException();
 

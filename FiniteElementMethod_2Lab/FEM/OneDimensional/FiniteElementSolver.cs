@@ -1,5 +1,7 @@
 ﻿using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
+using SharpMath;
 using SharpMath.EquationsSystem.Solver;
+using SharpMath.Matrices;
 using SharpMath.Vectors;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
@@ -21,7 +23,7 @@ public class FiniteElementSolver
         _firstBoundary = firstBoundary;
     }
 
-    public Vector Solve()
+    public Equation<SymmetricSparseMatrix> Solve()
     {
         var equation = _globalAssembler.BuildEquation();
 
@@ -32,9 +34,9 @@ public class FiniteElementSolver
         //.ApplySecondBoundaryConditions(equation, _secondBoundary);
         //     .ApplyThirdBoundaryConditions(equation, _thirdBoundary)
 
-        var solution = _SLAEsolver.Solve(equation);
+        _SLAEsolver.Solve(equation);
 
 
-        return solution;
+        return equation;
     }
 }

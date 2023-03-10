@@ -11,6 +11,7 @@ using SharpMath.Matrices;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters.Providers;
+using SharpMath;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
 
@@ -77,20 +78,30 @@ public class FEMInfrastructure
 
         // Сюда поставить цикл
         // Простая итерация/Ньютон
+        double norm = 1e10;
+
         do
         {
             var solver = new FiniteElementSolver(
                 GetGlobalAssembler(),
                 _SLAESolver,
-                _firstBoundary.Select(condition => condition.ToFixedValue(CurrentTime))
+                _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
                     .ToArray()
             );
 
-            var weights = solver.Solve();
-            TimeLayersSolution[_currentTimeLayer] = weights;
-        } while (
-            //Условия выхода простой итерации
-            false);
+            var equation = solver.Solve();
+            TimeLayersSolution[_currentTimeLayer] = equation.Solution;
+
+
+
+            var Aq = LinAl.Multiply(equation.Matrix, equation.Solution);
+
+            var AqMinusB = LinAl.Subtract(Aq, equation.RightSide);
+
+            norm = AqMinusB.Norm / equation.RightSide.Norm;
+            //Console.WriteLine($"norm: {norm}");
+
+        } while (norm > 1e-13);
 
     }
 
@@ -115,11 +126,11 @@ public class FEMInfrastructure
             sigma: _sigma,
             densityFunctionProvider: _densityFunction,
             previousTimeLayerSolution: PreviousSolution,
-            timeStep: CurrentTime - _timeLayers[_currentTimeLayer - 1]
+            timeStep: CurrentTime - _timeLayers[_currentTimeLayer - 1] 
         );
     }
 
-    private IFunctionalParameter<double> GetLambda()
+    private SolutionDependentParameter GetLambda()
     {
         return new SolutionDependentParameter(
             new FiniteElementSolution(_grid, CurrentSolution),

@@ -7,7 +7,7 @@ public readonly struct FirstBoundary
     public required int Node { get; init; }
     public required Func<double, double> ValueFromTime { get; init; }
 
-    public FixedValue ToFixedValue(double time)
+    public FixedValue FromTime(double time)
     {
         return new FixedValue
         {

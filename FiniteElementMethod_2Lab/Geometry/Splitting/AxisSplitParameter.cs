@@ -13,7 +13,7 @@ public class AxisSplitParameter
     public IEnumerable<(Interval section, IIntervalSplitter parameter)> SectionWithParameter =>
         Sections.Select((section, index) => new ValueTuple<Interval, IIntervalSplitter>(section, Splitters[index]));
 
-    public AxisSplitParameter(double[] points, IIntervalSplitter[] splitters)
+    public AxisSplitParameter(double[] points, params IIntervalSplitter[] splitters)
     {
         if (points.Length - 1 != splitters.Length)
             throw new ArgumentException();
