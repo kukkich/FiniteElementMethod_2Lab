@@ -88,7 +88,7 @@ public class LocalAssembler : ILocalAssembler
         return result;
     }
 
-    private Vector GetRightSide(Element element)
+    protected Vector GetRightSide(Element element)
     {
         var template = _massTemplateProvider.GetMatrix();
         var vector = Vector.Create(2, i =>

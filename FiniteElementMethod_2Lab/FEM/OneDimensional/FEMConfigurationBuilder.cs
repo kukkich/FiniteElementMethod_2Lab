@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Reflection;
 using FiniteElementMethod_2Lab.FEM.Core.Assembling;
+using FiniteElementMethod_2Lab.FEM.Core.Global;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters.Providers;
 using FiniteElementMethod_2Lab.Geometry;
+using FiniteElementMethod_2Lab.SLAE.Preconditions;
+using FiniteElementMethod_2Lab.SLAE.Solvers;
 using SharpMath.EquationsSystem.Solver;
 using SharpMath.Matrices;
 using SharpMath.Vectors;
@@ -15,34 +18,41 @@ namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
 public class FEMInfrastructureBuilder
 {
     private readonly IMatrixPortraitBuilder<SymmetricSparseMatrix> _matrixPortraitBuilder;
+    private readonly IMatrixPortraitBuilder<SparseMatrix> _linearMatrixPortraitBuilder;
     private readonly ITemplateMatrixProvider _massTemplateProvider;
     private readonly ITemplateMatrixProvider _stiffnessTemplateProvider;
     private readonly IInserter<SymmetricSparseMatrix> _inserter;
+    private readonly IInserter<SparseMatrix> _linearInserter;
     private Func<double, double, double>? _densityFunction;
     private Func<double, double>? _lambda;
     private double? _sigma;
     private Grid<double>? _grid;
     private double[]? _timeLayers;
-    private ConjugateGradientSolver? _SLAESolver;
+    private ConjugateGradientSolver _mcg;
+    private LOS _los;
     private Vector? _initialWeights;
     private readonly List<FirstBoundary> _firstBoundary = new();
 
     public FEMInfrastructureBuilder()
     {
         _matrixPortraitBuilder = new PortraitBuilder();
+        _linearMatrixPortraitBuilder = new MatrixPortraitBuilder();
         _massTemplateProvider = new MassMatrixTemplateProvider();
         _stiffnessTemplateProvider = new StiffnessMatrixTemplateProvider();
         _inserter = new Inserter();
+        _linearInserter = new LinearInserter();
     }
 
-    public FEMInfrastructureBuilder SetSLAESolver(Func<SLAESolvingConfiguration> solverConfiguration)
+    public FEMInfrastructureBuilder SetSLAESolver(Func<SLAESolvingConfiguration> solverConfiguration,
+        LUPreconditioner luPreconditioner, LUSparse luSparse)
     {
         var configuration = solverConfiguration();
-        _SLAESolver = new ConjugateGradientSolver(
-            configuration.PreconditionFactory, 
+        _mcg = new ConjugateGradientSolver(
+            configuration.PreconditionFactory,
             configuration.Precision,
             configuration.MaxIteration
-            );
+        );
+        _los = new LOS(luPreconditioner, luSparse);
 
         return this;
     }
@@ -102,7 +112,7 @@ public class FEMInfrastructureBuilder
     public FEMInfrastructure Build()
     {
         EnsureAllFieldNotNull();
-        
+
         var densityFunction = new TimeRelatedFunctionalProvider(_grid!, _densityFunction!);
         var sigma = new FixedValueProvider((double)_sigma!);
 
@@ -110,21 +120,23 @@ public class FEMInfrastructureBuilder
             throw new InvalidOperationException();
 
         return new FEMInfrastructure(
+            linearMatrixPortraitBuilder: _linearMatrixPortraitBuilder,
             matrixPortraitBuilder: _matrixPortraitBuilder,
             massTemplateProvider: _massTemplateProvider,
             stiffnessTemplateProvider: _stiffnessTemplateProvider,
             inserter: _inserter,
+            linearInserter: _linearInserter,
             grid: _grid!,
             densityFunction: densityFunction,
             sigma: sigma,
             timeLayers: _timeLayers!,
-            SLAESolver: _SLAESolver!,
+            mcg: _mcg,
+            los: _los,
             initialWeights: _initialWeights,
             lambda: _lambda!,
             firstBoundary: _firstBoundary.ToArray()
         );
     }
-
 
     private void EnsureAllFieldNotNull()
     {

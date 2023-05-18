@@ -4,6 +4,7 @@ using System.Linq;
 using FiniteElementMethod_2Lab.FEM.Core;
 using SharpMath.Vectors;
 using FiniteElementMethod_2Lab.FEM.Core.Assembling;
+using FiniteElementMethod_2Lab.FEM.Core.Global;
 using FiniteElementMethod_2Lab.FEM.Core.Parameters;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
 using FiniteElementMethod_2Lab.Geometry;
@@ -11,6 +12,8 @@ using SharpMath.Matrices;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters.Providers;
+using FiniteElementMethod_2Lab.FEM.OneDimensional.Global;
+using FiniteElementMethod_2Lab.SLAE.Solvers;
 using SharpMath;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
@@ -26,15 +29,17 @@ public class FEMInfrastructure
 
     private int _currentTimeLayer = 0;
 
-
     private readonly IMatrixPortraitBuilder<SymmetricSparseMatrix> _matrixPortraitBuilder;
+    private readonly IMatrixPortraitBuilder<SparseMatrix> _linearMatrixPortraitBuilder;
     private readonly ITemplateMatrixProvider _massTemplateProvider;
     private readonly ITemplateMatrixProvider _stiffnessTemplateProvider;
     private readonly IInserter<SymmetricSparseMatrix> _inserter;
+    private readonly IInserter<SparseMatrix> _linearInserter;
     private readonly Grid<double> _grid;
     private readonly TimeRelatedFunctionalProvider _densityFunction;
     private readonly FixedValueProvider _sigma;
-    private readonly ConjugateGradientSolver _SLAESolver;
+    private readonly ConjugateGradientSolver _mcg;
+    private readonly LOS _los;
     private readonly double[] _timeLayers;
     private readonly Func<double, double> _lambda;
     private readonly FirstBoundary[] _firstBoundary;
@@ -42,20 +47,24 @@ public class FEMInfrastructure
 
     public FEMInfrastructure(
         IMatrixPortraitBuilder<SymmetricSparseMatrix> matrixPortraitBuilder,
+        IMatrixPortraitBuilder<SparseMatrix> linearMatrixPortraitBuilder,
         ITemplateMatrixProvider massTemplateProvider,
         ITemplateMatrixProvider stiffnessTemplateProvider,
         IInserter<SymmetricSparseMatrix> inserter,
+        IInserter<SparseMatrix> linearInserter,
         Grid<double> grid,
         TimeRelatedFunctionalProvider densityFunction,
         FixedValueProvider sigma,
         double[] timeLayers,
-        ConjugateGradientSolver SLAESolver,
+        ConjugateGradientSolver mcg,
+        LOS los,
         Vector initialWeights,
         Func<double, double> lambda,
         FirstBoundary[] firstBoundary
         )
     {
         _matrixPortraitBuilder = matrixPortraitBuilder;
+        _linearMatrixPortraitBuilder = linearMatrixPortraitBuilder;
         _massTemplateProvider = massTemplateProvider;
         _stiffnessTemplateProvider = stiffnessTemplateProvider;
         _inserter = inserter;
@@ -63,7 +72,8 @@ public class FEMInfrastructure
         _densityFunction = densityFunction;
         _sigma = sigma;
         _timeLayers = timeLayers;
-        _SLAESolver = SLAESolver;
+        _mcg = mcg;
+        _los = los;
         TimeLayersSolution = new Vector[_timeLayers.Length];
         TimeLayersSolution[0] = initialWeights;
         _lambda = lambda;
@@ -82,17 +92,23 @@ public class FEMInfrastructure
 
         do
         {
-            var solver = new FiniteElementSolver(
-                GetGlobalAssembler(),
-                _SLAESolver,
+            var linearSolver = new LinearFiniteSolver(
+                GetLinearGlobalAssembler(),
+                _los,
                 _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
                     .ToArray()
             );
 
+            var linearEquation = linearSolver.Solve();
+            TimeLayersSolution[_currentTimeLayer] = linearEquation.Solution;
+
+            var solver = new FiniteElementSolver(
+                GetGlobalAssembler(),
+                _mcg,
+                _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
+                    .ToArray());
+
             var equation = solver.Solve();
-            TimeLayersSolution[_currentTimeLayer] = equation.Solution;
-
-
 
             var Aq = LinAl.Multiply(equation.Matrix, equation.Solution);
 
@@ -103,6 +119,31 @@ public class FEMInfrastructure
 
         } while (norm > 1e-13);
 
+    }
+
+    private GlobalLinearAssembler GetLinearGlobalAssembler()
+    {
+        return new GlobalLinearAssembler(
+            grid: _grid,
+            densityFunctionProvider: _densityFunction,
+            diffusionProvider: GetLambda(),
+            matrixPortraitBuilder: _linearMatrixPortraitBuilder,
+            localLinearAssembler: GetLinearLocalAssembler(),
+            inserter: _linearInserter
+        );
+    }
+
+    private ILocalAssembler GetLinearLocalAssembler()
+    {
+        return new LocalLinearAssembler(
+            lambda: GetLambda(),
+            massTemplateProvider: _massTemplateProvider,
+            stiffnessTemplateProvider: _stiffnessTemplateProvider,
+            sigma: _sigma,
+            densityFunctionProvider: _densityFunction,
+            previousTimeLayerSolution: PreviousSolution,
+            timeStep: CurrentTime - _timeLayers[_currentTimeLayer - 1]
+        );
     }
 
     private GlobalAssembler GetGlobalAssembler()
@@ -125,8 +166,8 @@ public class FEMInfrastructure
             stiffnessTemplateProvider: _stiffnessTemplateProvider,
             sigma: _sigma,
             densityFunctionProvider: _densityFunction,
-            previousTimeLayerSolution: PreviousSolution,
-            timeStep: CurrentTime - _timeLayers[_currentTimeLayer - 1] 
+            previousTimeLayerSolution: CurrentSolution,
+            timeStep: CurrentTime - _timeLayers[_currentTimeLayer - 1]
         );
     }
 

@@ -3,4 +3,6 @@
 public interface IFunctionalParameter<in TPoint>
 {
     public double Calculate(int nodeIndex);
+
+    public double CalculateDerivative(double point);
 }

@@ -5,6 +5,7 @@ using SharpMath;
 using SharpMath.Matrices;
 using SharpMath.Vectors;
 using System;
+using FiniteElementMethod_2Lab.FEM.Core.Global;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
@@ -26,14 +27,14 @@ public class GlobalAssembler
     private readonly IInserter<SymmetricSparseMatrix> _inserter;
 
     private Equation<SymmetricSparseMatrix> _equation = null!;
-    
+
     public GlobalAssembler(
         Grid<double> grid,
-        IFunctionalParameter<double> densityFunctionProvider, 
+        IFunctionalParameter<double> densityFunctionProvider,
         IFunctionalParameter<double> diffusionProvider,
-        IMatrixPortraitBuilder<SymmetricSparseMatrix> matrixPortraitBuilder, 
-        ILocalAssembler localAssembler, 
-        IInserter<SymmetricSparseMatrix> inserter 
+        IMatrixPortraitBuilder<SymmetricSparseMatrix> matrixPortraitBuilder,
+        ILocalAssembler localAssembler,
+        IInserter<SymmetricSparseMatrix> inserter
     )
     {
         _grid = grid;
@@ -118,5 +119,26 @@ public class GaussExcluding
         equation.RightSide[row] = fixedValue;
 
         return equation;
+    }
+
+    public void Exclude(Equation<SparseMatrix> equation, int row, double fixedValue)
+    {
+        equation.RightSide[row] = fixedValue;
+        equation.Matrix.Diagonal[row] = 1d;
+
+        for (var j = equation.Matrix.RowsIndexes[row];
+             j < equation.Matrix.RowsIndexes[row + 1];
+             j++)
+        {
+            equation.Matrix.LowerValues[j] = 0d;
+        }
+
+        for (var j = row + 1; j < equation.Matrix.CountRows; j++)
+        {
+            var elementIndex = equation.Matrix[j, row];
+
+            if (elementIndex == -1) continue;
+            equation.Matrix.UpperValues[elementIndex] = 0;
+        }
     }
 }

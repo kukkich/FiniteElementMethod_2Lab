@@ -21,4 +21,9 @@ public class TimeRelatedFunctionalProvider : IFunctionalParameter<double>
         var node = _grid.Nodes[nodeIndex];
         return _func(node, Time);
     }
+
+    public double CalculateDerivative(double point)
+    {
+        throw new NotImplementedException();
+    }
 }

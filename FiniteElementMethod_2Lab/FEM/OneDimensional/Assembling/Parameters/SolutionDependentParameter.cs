@@ -2,6 +2,7 @@
 using FiniteElementMethod_2Lab.FEM.Core;
 using FiniteElementMethod_2Lab.FEM.Core.Parameters;
 using FiniteElementMethod_2Lab.Geometry;
+using SharpMath.Functions;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters;
 
@@ -35,5 +36,10 @@ public class SolutionDependentParameter : IFunctionalParameter<double>
         var u = _solution.Calculate(point);
 
         return _solutionDependency(u);
+    }
+
+    public double CalculateDerivative(double point)
+    {
+        return DerivativeCalculator.CalculateDerivative(_solutionDependency, point);
     }
 }

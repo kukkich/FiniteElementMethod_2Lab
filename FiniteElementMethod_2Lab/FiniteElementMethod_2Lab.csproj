@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\C#\Projects\SharpMath\SharpMath\SharpMath.csproj" />
+    <ProjectReference Include="..\..\SharpMath\SharpMath\SharpMath.csproj" />
   </ItemGroup>
 
 </Project>

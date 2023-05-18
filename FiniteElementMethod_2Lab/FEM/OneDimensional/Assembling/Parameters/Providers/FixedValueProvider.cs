@@ -20,4 +20,9 @@ public class FixedValueProvider : IAttachedToElementParameterProvider<double>, I
     {
         return _value;
     }
+
+    public double CalculateDerivative(double point)
+    {
+        throw new NotImplementedException();
+    }
 }

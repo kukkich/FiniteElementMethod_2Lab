@@ -18,7 +18,7 @@ public class Program
     {
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-        var infrastructure = AccuracyTests.GetExponential();
+        var infrastructure = AccuracyTests.GetFirstTest();
 
         while (infrastructure.HasNextTime)
         {
