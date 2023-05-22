@@ -28,6 +28,7 @@ public class FEMInfrastructure
     public double TimeStep => CurrentTime - _timeLayers[_currentTimeLayer - 1];
 
     private int _currentTimeLayer = 0;
+    public int IterationsNumber { get; private set; }
 
     private readonly IMatrixPortraitBuilder<SymmetricSparseMatrix> _matrixPortraitBuilder;
     private readonly IMatrixPortraitBuilder<SparseMatrix> _linearMatrixPortraitBuilder;
@@ -68,6 +69,7 @@ public class FEMInfrastructure
         _massTemplateProvider = massTemplateProvider;
         _stiffnessTemplateProvider = stiffnessTemplateProvider;
         _inserter = inserter;
+        _linearInserter = linearInserter;
         _grid = grid;
         _densityFunction = densityFunction;
         _sigma = sigma;
@@ -109,6 +111,7 @@ public class FEMInfrastructure
                     .ToArray());
 
             var equation = solver.Solve();
+            //TimeLayersSolution[_currentTimeLayer] = equation.Solution;
 
             var Aq = LinAl.Multiply(equation.Matrix, equation.Solution);
 
@@ -116,8 +119,9 @@ public class FEMInfrastructure
 
             norm = AqMinusB.Norm / equation.RightSide.Norm;
             //Console.WriteLine($"norm: {norm}");
+            IterationsNumber++;
 
-        } while (norm > 1e-13);
+        } while (norm > 1e-20);
 
     }
 
@@ -133,7 +137,7 @@ public class FEMInfrastructure
         );
     }
 
-    private ILocalAssembler GetLinearLocalAssembler()
+    private LocalLinearAssembler GetLinearLocalAssembler()
     {
         return new LocalLinearAssembler(
             lambda: GetLambda(),
@@ -141,7 +145,7 @@ public class FEMInfrastructure
             stiffnessTemplateProvider: _stiffnessTemplateProvider,
             sigma: _sigma,
             densityFunctionProvider: _densityFunction,
-            previousTimeLayerSolution: PreviousSolution,
+            previousTimeLayerSolution: CurrentSolution,
             timeStep: CurrentTime - _timeLayers[_currentTimeLayer - 1]
         );
     }

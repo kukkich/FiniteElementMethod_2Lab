@@ -1,4 +1,5 @@
-﻿using FiniteElementMethod_2Lab.FEM.Core.Parameters;
+﻿using System;
+using FiniteElementMethod_2Lab.FEM.Core.Parameters;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters.Providers;
 

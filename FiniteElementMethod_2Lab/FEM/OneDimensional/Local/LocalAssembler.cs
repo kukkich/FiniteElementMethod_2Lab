@@ -9,12 +9,12 @@ namespace FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
 
 public class LocalAssembler : ILocalAssembler
 {
-    private readonly IFunctionalParameter<double> _lambda;
+    protected readonly IFunctionalParameter<double> Lambda;
     private readonly ITemplateMatrixProvider _massTemplateProvider;
-    private readonly ITemplateMatrixProvider _stiffnessTemplateProvider;
+    protected readonly ITemplateMatrixProvider StiffnessTemplateProvider;
     private readonly IAttachedToElementParameterProvider<double> _sigma;
     private readonly IFunctionalParameter<double> _densityFunctionProvider;
-    private readonly Vector _previousTimeLayerSolution;
+    protected readonly Vector PreviousTimeLayerSolution;
     private readonly double _timeStep;
 
     public LocalAssembler(
@@ -27,12 +27,12 @@ public class LocalAssembler : ILocalAssembler
         double timeStep
     )
     {
-        _lambda = lambda;
+        Lambda = lambda;
         _massTemplateProvider = massTemplateProvider;
-        _stiffnessTemplateProvider = stiffnessTemplateProvider;
+        StiffnessTemplateProvider = stiffnessTemplateProvider;
         _sigma = sigma;
         _densityFunctionProvider = densityFunctionProvider;
-        _previousTimeLayerSolution = previousTimeLayerSolution;
+        PreviousTimeLayerSolution = previousTimeLayerSolution;
         _timeStep = timeStep;
     }
 
@@ -42,8 +42,6 @@ public class LocalAssembler : ILocalAssembler
         var mass = GetMassMatrix(element);
 
         var resultMatrix = LinAl.Sum(stiffness, mass).AsImmutable();
-
-
 
         return new LocalMatrix(
             resultMatrix,
@@ -64,9 +62,9 @@ public class LocalAssembler : ILocalAssembler
 
     private ImmutableMatrix GetStiffnessMatrix(Element element)
     {
-        var template = _stiffnessTemplateProvider.GetMatrix();
-        var lambdaLeft = _lambda.Calculate(element.GetBoundNodeIndexes(Bound.Left));
-        var lambdaRight = _lambda.Calculate(element.GetBoundNodeIndexes(Bound.Right));
+        var template = StiffnessTemplateProvider.GetMatrix();
+        var lambdaLeft = Lambda.Calculate(element.GetBoundNodeIndexes(Bound.Left));
+        var lambdaRight = Lambda.Calculate(element.GetBoundNodeIndexes(Bound.Right));
 
         var coefficient = (lambdaLeft + lambdaRight) / (2d * element.Length);
 
@@ -98,7 +96,7 @@ public class LocalAssembler : ILocalAssembler
             var f = _densityFunctionProvider.Calculate(nodeIndex);
 
             var sigma = _sigma.GetById(element.MaterialId);
-            var q = _previousTimeLayerSolution[nodeIndex];
+            var q = PreviousTimeLayerSolution[nodeIndex];
             var timeImpact = q * sigma / (_timeStep);
 
             return f + timeImpact;

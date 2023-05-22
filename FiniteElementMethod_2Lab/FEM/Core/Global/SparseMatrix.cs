@@ -1,4 +1,5 @@
 ﻿using System;
+using FiniteElementMethod_2Lab.FEM.Core.Assembling;
 using SharpMath.Vectors;
 
 namespace FiniteElementMethod_2Lab.FEM.Core.Global;
@@ -81,5 +82,39 @@ public class SparseMatrix
         Array.Copy(UpperValues, upperValues, UpperValues.Length);
 
         return new SparseMatrix(rowIndexes, columnIndexes, diagonal, lowerValues, upperValues);
+    }
+
+    public static Vector Sum(Vector vector1, Vector vector2)
+    {
+        if (vector1.Length != vector2.Length) throw new Exception("Can't sum vectors");
+
+        for (var i = 0; i < vector1.Length; i++)
+        {
+            vector1[i] += vector2[i];
+        }
+
+        return vector1;
+    }
+
+    public static Vector Subtract(Vector vector1, Vector vector2)
+    {
+        if (vector1.Length != vector2.Length) throw new Exception("Can't sum vectors");
+
+        for (var i = 0; i < vector1.Length; i++)
+        {
+            vector2[i] = vector1[i] - vector2[i];
+        }
+
+        return vector2;
+    }
+
+    public static Vector Multiply(double number, Vector vector)
+    {
+        for (var i = 0; i < vector.Length; i++)
+        {
+            vector[i] *= number;
+        }
+
+        return vector;
     }
 }

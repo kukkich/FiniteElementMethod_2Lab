@@ -25,7 +25,8 @@ public class LOS
     private void PrepareProcess(Equation<SparseMatrix> equation)
     {
         _preconditionMatrix = _luPreconditioner.Decompose(equation.Matrix);
-        _r = _luSparse.CalcY(_preconditionMatrix, GlobalVector.Subtract(equation.RightSide, equation.Matrix * equation.Solution));
+        var b = equation.Matrix * equation.Solution;
+        _r = _luSparse.CalcY(_preconditionMatrix, LinAl.Subtract(equation.RightSide, b, b));
         _z = _luSparse.CalcX(_preconditionMatrix, _r);
         _p = _luSparse.CalcY(_preconditionMatrix, equation.Matrix * _z);
     }
@@ -39,7 +40,7 @@ public class LOS
 
     private void IterationProcess(Equation<SparseMatrix> equation)
     {
-        Console.WriteLine("LOS");
+        //Console.WriteLine("LOS");
 
         var residual = Vector.ScalarProduct(_r, _r);
         var residualNext = residual;
@@ -50,17 +51,20 @@ public class LOS
 
             var alpha = Vector.ScalarProduct(_p, _r) / scalarPP;
 
-            GlobalVector.Sum(equation.Solution, alpha * _z);
+            LinAl.Sum(equation.Solution, LinAl.Multiply(alpha, _z), equation.Solution);
 
-            var rNext = GlobalVector.Subtract(_r, alpha * _p);
+            var alphaP = LinAl.Multiply(alpha, _p);
+            var rNext = LinAl.Subtract(_r, alphaP, alphaP);
 
             var LAUr = _luSparse.CalcY(_preconditionMatrix, equation.Matrix * _luSparse.CalcX(_preconditionMatrix, rNext));
 
             var beta = -(Vector.ScalarProduct(_p, LAUr) / scalarPP);
 
-            var zNext = GlobalVector.Sum(_luSparse.CalcX(_preconditionMatrix, rNext), GlobalVector.Multiply(beta, _z));
+            var betaZ = LinAl.Multiply(beta, _z);
+            var zNext = LinAl.Sum(_luSparse.CalcX(_preconditionMatrix, rNext), betaZ, betaZ);
 
-            var pNext = GlobalVector.Sum(LAUr, GlobalVector.Multiply(beta, _p));
+            var betaP = LinAl.Multiply(beta, _p);
+            var pNext = LinAl.Sum(LAUr, betaP, betaP);
 
             _r = rNext;
             _z = zNext;
@@ -68,9 +72,9 @@ public class LOS
 
             residualNext = Vector.ScalarProduct(_r, _r) / residual;
 
-            CourseHolder.GetInfo(i, residualNext);
+            //CourseHolder.GetInfo(i, residualNext);
         }
 
-        Console.WriteLine();
+        //Console.WriteLine();
     }
 }

@@ -87,139 +87,220 @@ public static class AccuracyTests
 
     //    return infrastructure;
     //}
-    //public static FEMInfrastructure GetLinearTimeLinearByX()
-    //{
-    //    Program.U = (x, t) => 2 * x + t;
-    //    var U = Program.U;
+    public static FEMInfrastructure GetLinearTimeLinearByX()
+    {
+        Program.U = (x, t) => 2 * x + t;
+        var U = Program.U;
 
-    //    var xSplit = new AxisSplitParameter(
-    //        new[] { 0d, 1d },
-    //        new UniformSplitter(2)
-    //    );
+        var xSplit = new AxisSplitParameter(
+            new[] { 0d, 1d },
+            new UniformSplitter(2)
+        );
 
-    //    double[] time = new UniformSplitter(30)
-    //        .EnumerateValues(new Interval(0, 3))
-    //        .ToArray();
+        double[] time = new UniformSplitter(30)
+            .EnumerateValues(new Interval(0, 3))
+            .ToArray();
 
-    //    var grid = new OneDimensionalGridBuilder()
-    //        .Build(xSplit);
-    //    Program.Time = time;
-    //    Program.Grid = grid;
+        var grid = new OneDimensionalGridBuilder()
+            .Build(xSplit);
+        Program.Time = time;
+        Program.Grid = grid;
 
-    //    var infrastructure = new FEMInfrastructureBuilder()
-    //        .SetGrid(grid)
-    //        .SetTimeLayers(time)
-    //        .SetInitialWeights(GetInitialWeights(grid, U, time))
-    //        .SetSLAESolver(() => DefaultConfiguration)
-    //        .SetSigma(1)
-    //        .SetDensityFunction((x, t) => 1)
-    //        .SetLambdaBySolutionDependency(u => 1)
-    //        .SetFirstBoundary(0, t => U(0, t))
-    //        .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
-    //        .Build();
+        var luPreconditioner = new LUPreconditioner();
 
-    //    return infrastructure;
-    //}
-    //public static FEMInfrastructure GetQuadraticTimeLinearByX()
-    //{
-    //    Program.U = (x, t) => 2 * x + t*t;
-    //    var U = Program.U;
+        var infrastructure = new FEMInfrastructureBuilder()
+            .SetGrid(grid)
+            .SetTimeLayers(time)
+            .SetInitialWeights(GetInitialWeights(grid, U, time))
+            .SetSLAESolver(() => DefaultConfiguration, luPreconditioner, new LUSparse(luPreconditioner))
+            .SetSigma(1)
+            .SetDensityFunction((x, t) => 1)
+            .SetLambdaBySolutionDependency(u => 1)
+            .SetFirstBoundary(0, t => U(0, t))
+            .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
+            .Build();
 
-    //    var xSplit = new AxisSplitParameter(
-    //        new[] { 0d, 1d },
-    //        new UniformSplitter(2)
-    //    );
+        return infrastructure;
+    }
+    public static FEMInfrastructure GetQuadraticTimeLinearByX()
+    {
+        Program.U = (x, t) => 2 * x + t*t;
+        var U = Program.U;
 
-    //    double[] time = new UniformSplitter(30)
-    //        .EnumerateValues(new Interval(0, 3))
-    //        .ToArray();
+        var xSplit = new AxisSplitParameter(
+            new[] { 0d, 1d },
+            new UniformSplitter(2)
+        );
 
-    //    var grid = new OneDimensionalGridBuilder()
-    //        .Build(xSplit);
-    //    Program.Time = time;
-    //    Program.Grid = grid;
+        double[] time = new UniformSplitter(30)
+            .EnumerateValues(new Interval(0, 3))
+            .ToArray();
 
-    //    var infrastructure = new FEMInfrastructureBuilder()
-    //        .SetGrid(grid)
-    //        .SetTimeLayers(time)
-    //        .SetInitialWeights(GetInitialWeights(grid, U, time))
-    //        .SetSLAESolver(() => DefaultConfiguration)
-    //        .SetSigma(1)
-    //        .SetDensityFunction((x, t) => 2*t)
-    //        .SetLambdaBySolutionDependency(u => 1)
-    //        .SetFirstBoundary(0, t => U(0, t))
-    //        .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
-    //        .Build();
+        var grid = new OneDimensionalGridBuilder()
+            .Build(xSplit);
+        Program.Time = time;
+        Program.Grid = grid;
 
-    //    return infrastructure;
-    //}
+        var luPreconditioner = new LUPreconditioner();
 
-    //public static FEMInfrastructure GetCubicTimeLinearByX()
-    //{
-    //    Program.U = (x, t) => 2 * x + t * t * t;
-    //    var U = Program.U;
+        var infrastructure = new FEMInfrastructureBuilder()
+            .SetGrid(grid)
+            .SetTimeLayers(time)
+            .SetInitialWeights(GetInitialWeights(grid, U, time))
+            .SetSLAESolver(() => DefaultConfiguration, luPreconditioner, new LUSparse(luPreconditioner))
+            .SetSigma(1)
+            .SetDensityFunction((x, t) => 2*t)
+            .SetLambdaBySolutionDependency(u => 1)
+            .SetFirstBoundary(0, t => U(0, t))
+            .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
+            .Build();
 
-    //    var xSplit = new AxisSplitParameter(
-    //        new[] { 0d, 1d },
-    //        new UniformSplitter(2)
-    //    );
+        return infrastructure;
+    }
 
-    //    double[] time = new UniformSplitter(120)
-    //        .EnumerateValues(new Interval(0, 3))
-    //        .ToArray();
+    public static FEMInfrastructure GetCubicTimeLinearByX()
+    {
+        Program.U = (x, t) => 2 * x + t * t * t;
+        var U = Program.U;
 
-    //    var grid = new OneDimensionalGridBuilder()
-    //        .Build(xSplit);
-    //    Program.Time = time;
-    //    Program.Grid = grid;
+        var xSplit = new AxisSplitParameter(
+            new[] { 0d, 1d },
+            new UniformSplitter(2)
+        );
 
-    //    var infrastructure = new FEMInfrastructureBuilder()
-    //        .SetGrid(grid)
-    //        .SetTimeLayers(time)
-    //        .SetInitialWeights(GetInitialWeights(grid, U, time))
-    //        .SetSLAESolver(() => DefaultConfiguration)
-    //        .SetSigma(1)
-    //        .SetDensityFunction((x, t) => 3 * t * t)
-    //        .SetLambdaBySolutionDependency(u => 1)
-    //        .SetFirstBoundary(0, t => U(0, t))
-    //        .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
-    //        .Build();
+        double[] time = new UniformSplitter(120)
+            .EnumerateValues(new Interval(0, 3))
+            .ToArray();
 
-    //    return infrastructure;
-    //}
-    //public static FEMInfrastructure GetExponential()
-    //{
-    //    Program.U = (x, t) => Exp(x * (t - 1d));
-    //    var U = Program.U;
+        var grid = new OneDimensionalGridBuilder()
+            .Build(xSplit);
+        Program.Time = time;
+        Program.Grid = grid;
 
-    //    var xSplit = new AxisSplitParameter(
-    //        new[] { 0d, 1d },
-    //        new UniformSplitter(10)
-    //    );
+        var luPreconditioner = new LUPreconditioner();
 
-    //    double[] time = new UniformSplitter(30)
-    //        .EnumerateValues(new Interval(0, 3))
-    //        .ToArray();
+        var infrastructure = new FEMInfrastructureBuilder()
+            .SetGrid(grid)
+            .SetTimeLayers(time)
+            .SetInitialWeights(GetInitialWeights(grid, U, time))
+            .SetSLAESolver(() => DefaultConfiguration, luPreconditioner, new LUSparse(luPreconditioner))
+            .SetSigma(1)
+            .SetDensityFunction((x, t) => 3 * t * t)
+            .SetLambdaBySolutionDependency(u => 1)
+            .SetFirstBoundary(0, t => U(0, t))
+            .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
+            .Build();
 
-    //    var grid = new OneDimensionalGridBuilder()
-    //        .Build(xSplit);
-    //    Program.Time = time;
-    //    Program.Grid = grid;
+        return infrastructure;
+    }
 
-    //    var infrastructure = new FEMInfrastructureBuilder()
-    //        .SetGrid(grid)
-    //        .SetTimeLayers(time)
-    //        .SetInitialWeights(GetInitialWeights(grid, U, time))
-    //        .SetSLAESolver(() => DefaultConfiguration)
-    //        .SetSigma(1)
-    //        .SetDensityFunction((x, t) => U(x, t) * (x + Pow(t-1d, 2)))
-    //        .SetLambdaBySolutionDependency(u => 1)
-    //        .SetFirstBoundary(0, t => U(0, t))
-    //        .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
-    //        .Build();
+    public static FEMInfrastructure GetQuadraticX()
+    {
+        Program.U = (x, t) => x * x;
+        var U = Program.U;
 
-    //    return infrastructure;
-    //}
+        var xSplit = new AxisSplitParameter(
+            new[] { 0d, 1d },
+            new UniformSplitter(2)
+        );
+
+        double[] time = new UniformSplitter(3)
+            .EnumerateValues(new Interval(0, 3))
+            .ToArray();
+
+        var grid = new OneDimensionalGridBuilder()
+            .Build(xSplit);
+        Program.Time = time;
+        Program.Grid = grid;
+
+        var luPreconditioner = new LUPreconditioner();
+
+        var infrastructure = new FEMInfrastructureBuilder()
+            .SetGrid(grid)
+            .SetTimeLayers(time)
+            .SetInitialWeights(GetInitialWeights(grid, U, time))
+            .SetSLAESolver(() => DefaultConfiguration, luPreconditioner, new LUSparse(luPreconditioner))
+            .SetSigma(1)
+            .SetDensityFunction((x, t) => -6 * x * x)
+            .SetLambdaBySolutionDependency(u => u)
+            .SetFirstBoundary(0, t => U(0, t))
+            .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
+            .Build();
+
+        return infrastructure;
+    }
+
+    public static FEMInfrastructure GetCubicX()
+    {
+        Program.U = (x, t) => x * x * x;
+        var U = Program.U;
+
+        var xSplit = new AxisSplitParameter(
+            new[] { 0d, 1d },
+            new UniformSplitter(2)
+        );
+
+        double[] time = new UniformSplitter(30)
+            .EnumerateValues(new Interval(0, 3))
+            .ToArray();
+
+        var grid = new OneDimensionalGridBuilder()
+            .Build(xSplit);
+        Program.Time = time;
+        Program.Grid = grid;
+
+        var luPreconditioner = new LUPreconditioner();
+
+        var infrastructure = new FEMInfrastructureBuilder()
+            .SetGrid(grid)
+            .SetTimeLayers(time)
+            .SetInitialWeights(GetInitialWeights(grid, U, time))
+            .SetSLAESolver(() => DefaultConfiguration, luPreconditioner, new LUSparse(luPreconditioner))
+            .SetSigma(1)
+            .SetDensityFunction((x, t) => -6 * x)
+            .SetLambdaBySolutionDependency(u => 1)
+            .SetFirstBoundary(0, t => U(0, t))
+            .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
+            .Build();
+
+        return infrastructure;
+    }
+
+    public static FEMInfrastructure GetExponential()
+    {
+        Program.U = (x, t) => Exp(x * (t - 1d));
+        var U = Program.U;
+
+        var xSplit = new AxisSplitParameter(
+            new[] { 0d, 1d },
+            new UniformSplitter(10)
+        );
+
+        double[] time = new UniformSplitter(3)
+            .EnumerateValues(new Interval(0, 3))
+            .ToArray();
+
+        var grid = new OneDimensionalGridBuilder()
+            .Build(xSplit);
+        Program.Time = time;
+        Program.Grid = grid;
+
+        var luPreconditioner = new LUPreconditioner();
+
+        var infrastructure = new FEMInfrastructureBuilder()
+            .SetGrid(grid)
+            .SetTimeLayers(time)
+            .SetInitialWeights(GetInitialWeights(grid, U, time))
+            .SetSLAESolver(() => DefaultConfiguration, luPreconditioner, new LUSparse(luPreconditioner))
+            .SetSigma(1)
+            .SetDensityFunction((x, t) => U(x, t) * (x + Pow(t-1d, 2)))
+            .SetLambdaBySolutionDependency(u => 1)
+            .SetFirstBoundary(0, t => U(0, t))
+            .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
+            .Build();
+
+        return infrastructure;
+    }
 
     private static double[] GetInitialWeights(Grid<double> grid, Func<double, double, double> u, double[] time)
     {

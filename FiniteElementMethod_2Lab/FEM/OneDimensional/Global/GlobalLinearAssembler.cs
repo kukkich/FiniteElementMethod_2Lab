@@ -3,6 +3,7 @@ using FiniteElementMethod_2Lab.FEM.Core.Assembling;
 using FiniteElementMethod_2Lab.FEM.Core.Global;
 using FiniteElementMethod_2Lab.FEM.Core.Parameters;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
+using FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
 using FiniteElementMethod_2Lab.Geometry;
 using SharpMath;
 using SharpMath.Matrices;
@@ -23,7 +24,7 @@ public class GlobalLinearAssembler
     private readonly IFunctionalParameter<double> _densityFunctionProvider;
     private readonly IFunctionalParameter<double> _diffusionProvider;
     private readonly IMatrixPortraitBuilder<SparseMatrix> _matrixPortraitBuilder;
-    private readonly ILocalAssembler _localLinearAssembler;
+    private readonly LocalLinearAssembler _localLinearAssembler;
     private readonly IInserter<SparseMatrix> _inserter;
 
     private Equation<SparseMatrix> _equation = null!;
@@ -33,7 +34,7 @@ public class GlobalLinearAssembler
         IFunctionalParameter<double> densityFunctionProvider,
         IFunctionalParameter<double> diffusionProvider,
         IMatrixPortraitBuilder<SparseMatrix> matrixPortraitBuilder,
-        ILocalAssembler localLinearAssembler,
+        LocalLinearAssembler localLinearAssembler,
         IInserter<SparseMatrix> inserter
     )
     {
@@ -50,8 +51,8 @@ public class GlobalLinearAssembler
         var globalMatrix = _matrixPortraitBuilder.Build(_grid.Elements, _grid.Nodes.Length);
         _equation = new Equation<SparseMatrix>(
             Matrix: globalMatrix,
-            Solution: new Vector(new double[globalMatrix.RowsIndexes.Length]),
-            RightSide: new Vector(new double[globalMatrix.RowsIndexes.Length])
+            Solution: new Vector(new double[globalMatrix.CountRows]),
+            RightSide: new Vector(new double[globalMatrix.CountRows])
         );
 
         foreach (var element in _grid.Elements)

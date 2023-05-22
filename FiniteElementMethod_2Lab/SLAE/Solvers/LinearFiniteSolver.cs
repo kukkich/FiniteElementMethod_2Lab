@@ -29,8 +29,6 @@ public class LinearFiniteSolver
     {
         var equation = _globalAssembler.BuildEquation();
 
-        var a = equation.Matrix;
-
         _globalAssembler.ApplyFirstBoundaryConditions(equation, _firstBoundary);
 
         //.ApplySecondBoundaryConditions(equation, _secondBoundary);

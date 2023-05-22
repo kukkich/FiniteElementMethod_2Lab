@@ -18,7 +18,7 @@ public class Program
     {
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-        var infrastructure = AccuracyTests.GetFirstTest();
+        var infrastructure = AccuracyTests.GetQuadraticX();
 
         while (infrastructure.HasNextTime)
         {
@@ -26,8 +26,8 @@ public class Program
             infrastructure.NextTimeIteration();
         }
         WriteSolution(infrastructure.CurrentSolution, infrastructure.CurrentTime);
-
-        //Console.WriteLine("123");
+        
+        Console.WriteLine(infrastructure.IterationsNumber);
     }
 
     public static void WriteSolution(Vector q, double t)
