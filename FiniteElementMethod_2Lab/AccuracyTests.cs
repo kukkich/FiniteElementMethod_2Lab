@@ -16,7 +16,7 @@ public static class AccuracyTests
     {
         PreconditionFactory = new DiagonalPreconditionerFactory(),
         MaxIteration = 1500,
-        Precision = 1e-15
+        Precision = 1e-20
     };
 
     public static FEMInfrastructure GetFirstTest()

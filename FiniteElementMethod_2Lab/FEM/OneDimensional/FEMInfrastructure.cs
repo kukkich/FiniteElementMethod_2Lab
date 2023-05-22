@@ -20,6 +20,7 @@ namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
 
 public class FEMInfrastructure
 {
+    public static double Relaxation { get; set; } = 1d;
     public Vector CurrentSolution => TimeLayersSolution[_currentTimeLayer];
     public Vector PreviousSolution => TimeLayersSolution[_currentTimeLayer - 1];
     public Vector[] TimeLayersSolution { get; private set; }
@@ -95,7 +96,7 @@ public class FEMInfrastructure
         do
         {
             var linearSolver = new LinearFiniteSolver(
-                GetLinearGlobalAssembler(),
+                GetLinearGlobalAssembler(CurrentSolution),
                 _los,
                 _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
                     .ToArray()
@@ -105,13 +106,33 @@ public class FEMInfrastructure
             TimeLayersSolution[_currentTimeLayer] = linearEquation.Solution;
 
             var solver = new FiniteElementSolver(
-                GetGlobalAssembler(),
+                GetGlobalAssembler(linearEquation.Solution),
                 _mcg,
                 _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
-                    .ToArray());
+                    .ToArray()
+            );
 
-            var equation = solver.Solve();
-            //TimeLayersSolution[_currentTimeLayer] = equation.Solution;
+            var equation = solver.Solve(); // q1
+            LinAl.LinearCombination(
+                equation.Solution, CurrentSolution,
+                Relaxation, 1d - Relaxation,
+                equation.Solution
+            );
+
+            solver = new FiniteElementSolver(
+                GetGlobalAssembler(equation.Solution),
+                _mcg,
+                _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
+                    .ToArray()
+            );
+
+            var equationNext = solver.Solve(); // A(q1), b(q1)
+            const double w = 1d;
+            var qResult = LinAl.LinearCombination(
+                equationNext.Solution, equation.Solution,
+                w, 1d - w,
+                TimeLayersSolution[_currentTimeLayer]
+            );
 
             var Aq = LinAl.Multiply(equation.Matrix, equation.Solution);
 
@@ -121,64 +142,64 @@ public class FEMInfrastructure
             //Console.WriteLine($"norm: {norm}");
             IterationsNumber++;
 
-        } while (norm > 1e-20);
+        } while (norm > 1e-15);
 
     }
 
-    private GlobalLinearAssembler GetLinearGlobalAssembler()
+    private GlobalLinearAssembler GetLinearGlobalAssembler(Vector solution)
     {
         return new GlobalLinearAssembler(
             grid: _grid,
             densityFunctionProvider: _densityFunction,
-            diffusionProvider: GetLambda(),
+            diffusionProvider: GetLambda(solution),
             matrixPortraitBuilder: _linearMatrixPortraitBuilder,
-            localLinearAssembler: GetLinearLocalAssembler(),
+            localLinearAssembler: GetLinearLocalAssembler(solution),
             inserter: _linearInserter
         );
     }
 
-    private LocalLinearAssembler GetLinearLocalAssembler()
+    private LocalLinearAssembler GetLinearLocalAssembler(Vector solution)
     {
         return new LocalLinearAssembler(
-            lambda: GetLambda(),
+            lambda: GetLambda(solution),
             massTemplateProvider: _massTemplateProvider,
             stiffnessTemplateProvider: _stiffnessTemplateProvider,
             sigma: _sigma,
             densityFunctionProvider: _densityFunction,
-            previousTimeLayerSolution: CurrentSolution,
+            previousTimeLayerSolution: solution,
             timeStep: CurrentTime - _timeLayers[_currentTimeLayer - 1]
         );
     }
 
-    private GlobalAssembler GetGlobalAssembler()
+    private GlobalAssembler GetGlobalAssembler(Vector solution)
     {
         return new GlobalAssembler(
             grid: _grid,
             densityFunctionProvider: _densityFunction,
-            diffusionProvider: GetLambda(),
+            diffusionProvider: GetLambda(solution),
             matrixPortraitBuilder: _matrixPortraitBuilder,
-            localAssembler: GetLocalAssembler(),
+            localAssembler: GetLocalAssembler(solution),
             inserter: _inserter
         );
     }
 
-    private ILocalAssembler GetLocalAssembler()
+    private ILocalAssembler GetLocalAssembler(Vector solution)
     {
         return new LocalAssembler(
-            lambda: GetLambda(),
+            lambda: GetLambda(solution),
             massTemplateProvider: _massTemplateProvider,
             stiffnessTemplateProvider: _stiffnessTemplateProvider,
             sigma: _sigma,
             densityFunctionProvider: _densityFunction,
-            previousTimeLayerSolution: CurrentSolution,
+            previousTimeLayerSolution: solution,
             timeStep: CurrentTime - _timeLayers[_currentTimeLayer - 1]
         );
     }
 
-    private SolutionDependentParameter GetLambda()
+    private SolutionDependentParameter GetLambda(Vector solution)
     {
         return new SolutionDependentParameter(
-            new FiniteElementSolution(_grid, CurrentSolution),
+            new FiniteElementSolution(_grid, solution),
             _lambda,
             _grid
         );
