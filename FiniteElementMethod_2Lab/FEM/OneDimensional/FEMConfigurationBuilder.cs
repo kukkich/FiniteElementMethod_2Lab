@@ -128,7 +128,7 @@ public class FEMInfrastructureBuilder
 
     private void EnsureAllFieldNotNull()
     {
-        var type = this.GetType();
+        var type = GetType();
         foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic))
             if (field.GetValue(this) is null)
                 throw new InvalidOperationException($"field {field.Name} must be initialized");

@@ -10,4 +10,4 @@ public class Material<TLambda, TGamma>
         Lambda = lambda;
         Gamma = gamma;
     }
-};
+}

@@ -2,7 +2,6 @@
 using SharpMath;
 using SharpMath.EquationsSystem.Solver;
 using SharpMath.Matrices;
-using SharpMath.Vectors;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
 

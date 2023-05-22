@@ -1,22 +1,22 @@
-﻿using SharpMath.EquationsSystem.Solver;
-using System;
+﻿using System;
 using System.Linq;
 using FiniteElementMethod_2Lab.FEM.Core;
-using SharpMath.Vectors;
 using FiniteElementMethod_2Lab.FEM.Core.Assembling;
-using FiniteElementMethod_2Lab.FEM.Core.Parameters;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
-using FiniteElementMethod_2Lab.Geometry;
-using SharpMath.Matrices;
-using FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters.Providers;
+using FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
+using FiniteElementMethod_2Lab.Geometry;
 using SharpMath;
+using SharpMath.EquationsSystem.Solver;
+using SharpMath.Matrices;
+using SharpMath.Vectors;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
 
 public class FEMInfrastructure
 {
+    public static double Relaxation { get; set; } = 1d;
     public Vector CurrentSolution => TimeLayersSolution[_currentTimeLayer];
     public Vector PreviousSolution => TimeLayersSolution[_currentTimeLayer - 1];
     public Vector[] TimeLayersSolution { get; private set; }
@@ -24,7 +24,7 @@ public class FEMInfrastructure
     public double CurrentTime => _timeLayers[_currentTimeLayer];
     public double TimeStep => CurrentTime - _timeLayers[_currentTimeLayer - 1];
 
-    private int _currentTimeLayer = 0;
+    private int _currentTimeLayer;
 
 
     private readonly IMatrixPortraitBuilder<SymmetricSparseMatrix> _matrixPortraitBuilder;
@@ -69,58 +69,84 @@ public class FEMInfrastructure
         _lambda = lambda;
         _firstBoundary = firstBoundary;
     }
-
+    
     public void NextTimeIteration()
     {
+
         _currentTimeLayer++;
         _densityFunction.Time = CurrentTime;
         TimeLayersSolution[_currentTimeLayer] = TimeLayersSolution[_currentTimeLayer - 1];
-
+        const int maxIterations = 1000;
         // Сюда поставить цикл
         // Простая итерация/Ньютон
         double norm = 1e10;
-
+        var i = 0;
         do
         {
+            i++;
+
             var solver = new FiniteElementSolver(
-                GetGlobalAssembler(),
+                GetGlobalAssembler(CurrentSolution),
                 _SLAESolver,
                 _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
                     .ToArray()
             );
 
-            var equation = solver.Solve();
-            TimeLayersSolution[_currentTimeLayer] = equation.Solution;
+            var equation = solver.Solve(); // q1
+            LinAl.LinearCombination(
+                equation.Solution, CurrentSolution,
+                Relaxation, 1d - Relaxation,
+                equation.Solution
+           );
+            
 
+            var solverNext = new FiniteElementSolver(
+                GetGlobalAssembler(equation.Solution),
+                _SLAESolver,
+                _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
+                    .ToArray()
+            );
 
-
-            var Aq = LinAl.Multiply(equation.Matrix, equation.Solution);
-
-            var AqMinusB = LinAl.Subtract(Aq, equation.RightSide);
-
+            var equationNext = solverNext.Solve(); // A(q1), b(q1)
+            const double w = 0.8d;
+            var qResult = LinAl.LinearCombination(
+                equationNext.Solution, equation.Solution,
+                w, 1d - w,
+                TimeLayersSolution[_currentTimeLayer]
+            );
+            var Aq = LinAl.Multiply(equationNext.Matrix, qResult);
+            
+            var AqMinusB = LinAl.Subtract(Aq, equationNext.RightSide);
+            
             norm = AqMinusB.Norm / equation.RightSide.Norm;
-            //Console.WriteLine($"norm: {norm}");
-
-        } while (norm > 1e-13);
-
+        } while (norm > 1e-15 && i < maxIterations);
+        
+        Console.Write($"time: {CurrentTime:F3} exit with norm: {norm:E6} total iterations: ");
+        if (i == maxIterations)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+        }
+        Console.WriteLine($"{i}");
+        Console.ResetColor();
+        
     }
 
-    private GlobalAssembler GetGlobalAssembler()
+    private GlobalAssembler GetGlobalAssembler(Vector currentSolution)
     {
         return new GlobalAssembler(
             grid: _grid,
             densityFunctionProvider: _densityFunction,
-            diffusionProvider: GetLambda(),
+            diffusionProvider: GetLambda(currentSolution),
             matrixPortraitBuilder: _matrixPortraitBuilder,
-            localAssembler: GetLocalAssembler(),
+            localAssembler: GetLocalAssembler(currentSolution),
             inserter: _inserter
         );
     }
 
-    private ILocalAssembler GetLocalAssembler()
+    private ILocalAssembler GetLocalAssembler(Vector solution)
     {
         return new LocalAssembler(
-            lambda: GetLambda(),
+            lambda: GetLambda(solution),
             massTemplateProvider: _massTemplateProvider,
             stiffnessTemplateProvider: _stiffnessTemplateProvider,
             sigma: _sigma,
@@ -130,10 +156,10 @@ public class FEMInfrastructure
         );
     }
 
-    private SolutionDependentParameter GetLambda()
+    private SolutionDependentParameter GetLambda(Vector solution)
     {
         return new SolutionDependentParameter(
-            new FiniteElementSolution(_grid, CurrentSolution),
+            new FiniteElementSolution(_grid, solution),
             _lambda,
             _grid
         );

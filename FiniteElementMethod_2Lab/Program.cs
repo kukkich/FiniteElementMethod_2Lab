@@ -3,8 +3,10 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using FiniteElementMethod_2Lab.FEM.Core;
+using FiniteElementMethod_2Lab.FEM.OneDimensional;
 using FiniteElementMethod_2Lab.Geometry;
 using SharpMath.Vectors;
+using static System.Console;
 
 namespace FiniteElementMethod_2Lab;
 
@@ -18,8 +20,8 @@ public class Program
     {
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-        var infrastructure = AccuracyTests.GetExponential();
-
+        var infrastructure = AccuracyTests.GetQuadraticTimeLinearByX();
+        FEMInfrastructure.Relaxation = 0.7;
         while (infrastructure.HasNextTime)
         {
             WriteSolution(infrastructure.CurrentSolution, infrastructure.CurrentTime);
@@ -34,27 +36,27 @@ public class Program
     {
         var solution = new FiniteElementSolution(Grid, q);
 
-        if (Equals(t, 1d) || Equals(t, 2d) || Equals(t, 3d))
+        if (Equals(t, 0.1) || Equals(t, 1d) || Equals(t, 2d) || Equals(t, 3d))
         {
-            Console.ForegroundColor = ConsoleColor.Red;
+            ForegroundColor = ConsoleColor.Green;
             //Console.WriteLine($"t = {t}");
-            Console.ForegroundColor = ConsoleColor.White;
-
-            foreach (var x in new double[] {1/3d})
+            ForegroundColor = ConsoleColor.White;
+            foreach (var x in new[] { 1/3d })
             {
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                //WriteLine($"numeric({x:F3}) / expected({x:F3})");
+                ForegroundColor = ConsoleColor.Cyan;
                 //Console.WriteLine($"{x}");
-                Console.ForegroundColor = ConsoleColor.White;
-                
+                ForegroundColor = ConsoleColor.White;
+
                 var u = solution.Calculate(x);
                 var expected = U(x, t);
-                Console.WriteLine($"{u:F15} {expected:F15}");
+                WriteLine($"{u:F15} {expected:F15}");
             }
-            
+
         }
         var step = Grid.Elements.First().Length;
         var start = Grid.Nodes.First();
-        
+
         // Console.ForegroundColor = ConsoleColor.Red;
         // Console.WriteLine($"t = {t}");
         // Console.ForegroundColor = ConsoleColor.White;
