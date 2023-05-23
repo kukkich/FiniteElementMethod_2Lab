@@ -20,7 +20,8 @@ public class LocalLinearAssembler : LocalAssembler
         IAttachedToElementParameterProvider<double> sigma,
         IFunctionalParameter<double> densityFunctionProvider,
         Vector previousTimeLayerSolution, double timeStep
-    ) : base(lambda, massTemplateProvider, stiffnessTemplateProvider, sigma, densityFunctionProvider, previousTimeLayerSolution, timeStep)
+    ) : base(lambda, massTemplateProvider, stiffnessTemplateProvider, sigma, densityFunctionProvider,
+        previousTimeLayerSolution, timeStep)
     { }
 
     public new LocalMatrix AssembleMatrix(Element element)
@@ -29,7 +30,7 @@ public class LocalLinearAssembler : LocalAssembler
 
         for (var j = 0; j < matrix.Rows; j++)
         {
-            var derivativeStiffnessMatrix = GetDerivativeStiffnessMatrix(element, PreviousTimeLayerSolution[j]);
+            var derivativeStiffnessMatrix = GetDerivativeStiffnessMatrix(element, PreviousTimeLayerSolution[element.NodeIndexes[j]]);
 
             for (var i = 0; i < matrix.Columns; i++)
             {
@@ -37,7 +38,7 @@ public class LocalLinearAssembler : LocalAssembler
 
                 for (var r = 0; r < matrix.Columns; r++)
                 {
-                    sum += derivativeStiffnessMatrix[i, r] * PreviousTimeLayerSolution[r];
+                    sum += derivativeStiffnessMatrix[i, r] * PreviousTimeLayerSolution[element.NodeIndexes[r]];
                 }
 
                 matrix[i, j] += DampingCoefficient * sum;
@@ -56,13 +57,13 @@ public class LocalLinearAssembler : LocalAssembler
 
         for (var j = 0; j < vector.Length; j++)
         {
-            var derivativeStiffnessMatrix = GetDerivativeStiffnessMatrix(element, PreviousTimeLayerSolution[j]);
+            var derivativeStiffnessMatrix = GetDerivativeStiffnessMatrix(element, PreviousTimeLayerSolution[element.NodeIndexes[j]]);
 
             for (var i = 0; i < vector.Length; i++)
             {
                 for (var r = 0; r < vector.Length; r++)
                 {
-                    vector[i] += DampingCoefficient * PreviousTimeLayerSolution[r] * derivativeStiffnessMatrix[i, r];
+                    vector[i] += DampingCoefficient * PreviousTimeLayerSolution[element.NodeIndexes[r]] * derivativeStiffnessMatrix[i, r];
                 }
             }
         }
@@ -85,6 +86,7 @@ public class LocalLinearAssembler : LocalAssembler
 
     private double CalculateLambdaInterpolate(double q)
     {
-        return 2d * Lambda.CalculateDerivative(q) / 2d;
+        var lambda = Lambda.CalculateDerivative(q);
+        return 2d * lambda / 2d;
     }
 }

@@ -18,12 +18,12 @@ public class Program
     {
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-        var infrastructure = AccuracyTests.GetQuadraticX();
+        var infrastructure = AccuracyTests.GetLambdaDependency();
 
         while (infrastructure.HasNextTime)
         {
             WriteSolution(infrastructure.CurrentSolution, infrastructure.CurrentTime);
-            infrastructure.NextTimeIteration();
+            infrastructure.NextTimeNewtonIteration();
         }
         WriteSolution(infrastructure.CurrentSolution, infrastructure.CurrentTime);
         

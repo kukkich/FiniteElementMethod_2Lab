@@ -89,61 +89,92 @@ public class FEMInfrastructure
         _densityFunction.Time = CurrentTime;
         TimeLayersSolution[_currentTimeLayer] = TimeLayersSolution[_currentTimeLayer - 1];
 
-        // Сюда поставить цикл
-        // Простая итерация/Ньютон
-        double norm = 1e10;
+        var norm = 1d;
+        var i = 0;
 
         do
         {
-            var linearSolver = new LinearFiniteSolver(
-                GetLinearGlobalAssembler(CurrentSolution),
-                _los,
-                _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
-                    .ToArray()
-            );
-
-            var linearEquation = linearSolver.Solve();
-            TimeLayersSolution[_currentTimeLayer] = linearEquation.Solution;
-
             var solver = new FiniteElementSolver(
-                GetGlobalAssembler(linearEquation.Solution),
+                GetGlobalAssembler(CurrentSolution),
                 _mcg,
                 _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
                     .ToArray()
             );
 
-            var equation = solver.Solve(); // q1
+            var equation = solver.Solve();
             LinAl.LinearCombination(
                 equation.Solution, CurrentSolution,
                 Relaxation, 1d - Relaxation,
                 equation.Solution
             );
+            TimeLayersSolution[_currentTimeLayer] = equation.Solution;
 
-            solver = new FiniteElementSolver(
+            var solverNext = new FiniteElementSolver(
                 GetGlobalAssembler(equation.Solution),
                 _mcg,
                 _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
                     .ToArray()
             );
 
-            var equationNext = solver.Solve(); // A(q1), b(q1)
-            const double w = 1d;
-            var qResult = LinAl.LinearCombination(
-                equationNext.Solution, equation.Solution,
-                w, 1d - w,
-                TimeLayersSolution[_currentTimeLayer]
+            var equationNext = solverNext.Solve();
+  
+            var Aq = LinAl.Multiply(equationNext.Matrix, equation.Solution);
+
+            var AqMinusB = LinAl.Subtract(Aq, equationNext.RightSide);
+
+            norm = AqMinusB.Norm / equationNext.RightSide.Norm;
+            i++;
+
+        } while (norm > 1e-13 && i < 1000);
+
+        IterationsNumber += i;
+    }
+
+    public void NextTimeNewtonIteration()
+    {
+        _currentTimeLayer++;
+        _densityFunction.Time = CurrentTime;
+        TimeLayersSolution[_currentTimeLayer] = TimeLayersSolution[_currentTimeLayer - 1];
+
+        var norm = 1d;
+        var i = 0;
+
+        do
+        {
+            var solver = new LinearFiniteSolver(
+                GetLinearGlobalAssembler(CurrentSolution),
+                _los,
+                _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
+                    .ToArray()
             );
 
-            var Aq = LinAl.Multiply(equation.Matrix, equation.Solution);
+            var equation = solver.Solve();
+            LinAl.LinearCombination(
+                equation.Solution, CurrentSolution,
+                Relaxation, 1d - Relaxation,
+                equation.Solution
+            );
+            TimeLayersSolution[_currentTimeLayer] = equation.Solution;
 
-            var AqMinusB = LinAl.Subtract(Aq, equation.RightSide);
+            var solverNext = new FiniteElementSolver(
+                GetGlobalAssembler(equation.Solution),
+                _mcg,
+                _firstBoundary.Select(condition => condition.FromTime(CurrentTime))
+                    .ToArray()
+            );
 
-            norm = AqMinusB.Norm / equation.RightSide.Norm;
-            //Console.WriteLine($"norm: {norm}");
-            IterationsNumber++;
+            var equationNext = solverNext.Solve();
 
-        } while (norm > 1e-15);
+            var Aq = LinAl.Multiply(equationNext.Matrix, equation.Solution);
 
+            var AqMinusB = LinAl.Subtract(Aq, equationNext.RightSide);
+
+            norm = AqMinusB.Norm / equationNext.RightSide.Norm;
+            i++;
+
+        } while (norm > 1e-13 && i < 1000);
+
+        IterationsNumber += i;
     }
 
     private GlobalLinearAssembler GetLinearGlobalAssembler(Vector solution)

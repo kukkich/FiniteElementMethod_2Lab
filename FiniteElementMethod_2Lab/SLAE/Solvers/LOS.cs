@@ -3,7 +3,6 @@ using FiniteElementMethod_2Lab.FEM.Core.Global;
 using FiniteElementMethod_2Lab.SLAE.Preconditions;
 using SharpMath;
 using SharpMath.Vectors;
-using UMF3.SLAE;
 
 namespace FiniteElementMethod_2Lab.SLAE.Solvers;
 

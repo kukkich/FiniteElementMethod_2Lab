@@ -16,7 +16,7 @@ public static class AccuracyTests
     {
         PreconditionFactory = new DiagonalPreconditionerFactory(),
         MaxIteration = 1500,
-        Precision = 1e-20
+        Precision = 1e-15
     };
 
     public static FEMInfrastructure GetFirstTest()
@@ -54,39 +54,41 @@ public static class AccuracyTests
 
         return infrastructure;
     }
-    //public static FEMInfrastructure GetNoTimeDependentLinearByX()
-    //{
-    //    Program.U = (x, t) => 2*x + 1;
-    //    var U = Program.U;
+    public static FEMInfrastructure GetNoTimeDependentLinearByX()
+    {
+        Program.U = (x, t) => 2*x + 1;
+        var U = Program.U;
 
-    //    var xSplit = new AxisSplitParameter(
-    //        new[] { 0d, 1d },
-    //        new UniformSplitter(2)
-    //    );
+        var xSplit = new AxisSplitParameter(
+            new[] { 0d, 1d },
+            new UniformSplitter(2)
+        );
 
-    //    double[] time = new UniformSplitter(30)
-    //        .EnumerateValues(new Interval(0, 3))
-    //        .ToArray();
+        double[] time = new UniformSplitter(30)
+            .EnumerateValues(new Interval(0, 3))
+            .ToArray();
 
-    //    var grid = new OneDimensionalGridBuilder()
-    //        .Build(xSplit);
-    //    Program.Time = time;
-    //    Program.Grid = grid;
+        var grid = new OneDimensionalGridBuilder()
+            .Build(xSplit);
+        Program.Time = time;
+        Program.Grid = grid;
 
-    //    var infrastructure = new FEMInfrastructureBuilder()
-    //        .SetGrid(grid)
-    //        .SetTimeLayers(time)
-    //        .SetInitialWeights(GetInitialWeights(grid, U, time))
-    //        .SetSLAESolver(() => DefaultConfiguration)
-    //        .SetSigma(1)
-    //        .SetDensityFunction((x, t) => 0)
-    //        .SetLambdaBySolutionDependency(u => 1)
-    //        .SetFirstBoundary(0, t => U(0, t))
-    //        .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
-    //        .Build();
+        var luPreconditioner = new LUPreconditioner();
 
-    //    return infrastructure;
-    //}
+        var infrastructure = new FEMInfrastructureBuilder()
+            .SetGrid(grid)
+            .SetTimeLayers(time)
+            .SetInitialWeights(GetInitialWeights(grid, U, time))
+            .SetSLAESolver(() => DefaultConfiguration, luPreconditioner, new LUSparse(luPreconditioner))
+            .SetSigma(1)
+            .SetDensityFunction((x, t) => 0)
+            .SetLambdaBySolutionDependency(u => 1)
+            .SetFirstBoundary(0, t => U(0, t))
+            .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
+            .Build();
+
+        return infrastructure;
+    }
     public static FEMInfrastructure GetLinearTimeLinearByX()
     {
         Program.U = (x, t) => 2 * x + t;
@@ -194,7 +196,7 @@ public static class AccuracyTests
         return infrastructure;
     }
 
-    public static FEMInfrastructure GetQuadraticX()
+    public static FEMInfrastructure GetQuadraticLambda()
     {
         Program.U = (x, t) => x * x;
         var U = Program.U;
@@ -230,9 +232,9 @@ public static class AccuracyTests
         return infrastructure;
     }
 
-    public static FEMInfrastructure GetCubicX()
+    public static FEMInfrastructure GetLambdaDependency()
     {
-        Program.U = (x, t) => x * x * x;
+        Program.U = (x, t) => 2 * x + t;
         var U = Program.U;
 
         var xSplit = new AxisSplitParameter(
@@ -257,8 +259,8 @@ public static class AccuracyTests
             .SetInitialWeights(GetInitialWeights(grid, U, time))
             .SetSLAESolver(() => DefaultConfiguration, luPreconditioner, new LUSparse(luPreconditioner))
             .SetSigma(1)
-            .SetDensityFunction((x, t) => -6 * x)
-            .SetLambdaBySolutionDependency(u => 1)
+            .SetDensityFunction((x, t) => -12 * Pow(2 * x + t, 2) + 1)
+            .SetLambdaBySolutionDependency(u => u * u * u)
             .SetFirstBoundary(0, t => U(0, t))
             .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
             .Build();

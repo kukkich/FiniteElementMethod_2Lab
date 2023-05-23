@@ -1,8 +1,8 @@
 ﻿using System;
 using FiniteElementMethod_2Lab.FEM.Core;
 using FiniteElementMethod_2Lab.FEM.Core.Parameters;
+using FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
 using FiniteElementMethod_2Lab.Geometry;
-using SharpMath.Functions;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters;
 
