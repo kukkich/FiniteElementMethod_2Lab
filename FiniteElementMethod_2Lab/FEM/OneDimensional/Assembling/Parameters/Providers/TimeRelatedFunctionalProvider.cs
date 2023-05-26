@@ -1,6 +1,6 @@
-﻿using System;
-using FiniteElementMethod_2Lab.FEM.Core.Parameters;
+﻿using FiniteElementMethod_2Lab.FEM.Core.Parameters;
 using FiniteElementMethod_2Lab.Geometry;
+using System;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters.Providers;
 

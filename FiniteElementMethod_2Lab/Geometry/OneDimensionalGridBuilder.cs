@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using FiniteElementMethod_2Lab.FEM.Core;
 using FiniteElementMethod_2Lab.Geometry.Splitting;
+using System.Collections.Generic;
 using System.Linq;
-using FiniteElementMethod_2Lab.FEM.Core;
 
 namespace FiniteElementMethod_2Lab.Geometry;
 
@@ -12,11 +12,11 @@ public class OneDimensionalGridBuilder
         var totalNodes = GetTotalNodes(splitParameter);
 
         var nodes = new double[totalNodes];
-        
+
         var indexes = new Queue<int>();
         var elements = new Element[totalNodes - 1];
         var i = 0;
-        
+
         foreach (var (section, splitter) in splitParameter.SectionWithParameter)
         {
             var values = splitter.EnumerateValues(section);

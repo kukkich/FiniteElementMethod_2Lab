@@ -1,6 +1,5 @@
-﻿using System;
-using FiniteElementMethod_2Lab.FEM.Core.Assembling;
-using SharpMath.Vectors;
+﻿using SharpMath.Vectors;
+using System;
 
 namespace FiniteElementMethod_2Lab.FEM.Core.Global;
 

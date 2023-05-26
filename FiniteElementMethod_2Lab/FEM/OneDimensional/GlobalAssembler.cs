@@ -1,12 +1,12 @@
 ﻿using FiniteElementMethod_2Lab.FEM.Core.Assembling;
+using FiniteElementMethod_2Lab.FEM.Core.Global;
 using FiniteElementMethod_2Lab.FEM.Core.Parameters;
+using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
 using FiniteElementMethod_2Lab.Geometry;
 using SharpMath;
 using SharpMath.Matrices;
 using SharpMath.Vectors;
 using System;
-using FiniteElementMethod_2Lab.FEM.Core.Global;
-using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
 

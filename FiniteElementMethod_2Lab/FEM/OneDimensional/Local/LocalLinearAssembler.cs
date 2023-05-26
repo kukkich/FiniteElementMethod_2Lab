@@ -1,10 +1,9 @@
 ﻿using FiniteElementMethod_2Lab.FEM.Core;
 using FiniteElementMethod_2Lab.FEM.Core.Assembling;
 using FiniteElementMethod_2Lab.FEM.Core.Parameters;
-using SharpMath.Matrices;
 using SharpMath;
+using SharpMath.Matrices;
 using SharpMath.Vectors;
-using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
 
@@ -63,7 +62,8 @@ public class LocalLinearAssembler : LocalAssembler
             {
                 for (var r = 0; r < vector.Length; r++)
                 {
-                    vector[i] += DampingCoefficient * PreviousTimeLayerSolution[element.NodeIndexes[r]] * derivativeStiffnessMatrix[i, r];
+                    vector[i] += DampingCoefficient * PreviousTimeLayerSolution[element.NodeIndexes[j]] *
+                                 PreviousTimeLayerSolution[element.NodeIndexes[r]] * derivativeStiffnessMatrix[i, r];
                 }
             }
         }
@@ -79,14 +79,13 @@ public class LocalLinearAssembler : LocalAssembler
         var template = StiffnessTemplateProvider.GetMatrix();
 
         var lambdaInterpolate = CalculateLambdaInterpolate(q);
-        var coefficient = lambdaInterpolate / element.Length;
+        var coefficient = lambdaInterpolate / (2d * element.Length);
 
         return LinAl.Multiply(coefficient, template);
     }
 
     private double CalculateLambdaInterpolate(double q)
     {
-        var lambda = Lambda.CalculateDerivative(q);
-        return 2d * lambda / 2d;
+        return Lambda.CalculateDerivative(q);
     }
 }

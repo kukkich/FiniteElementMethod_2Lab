@@ -1,8 +1,8 @@
-﻿using System;
-using FiniteElementMethod_2Lab.FEM.Core.Global;
+﻿using FiniteElementMethod_2Lab.FEM.Core.Global;
 using FiniteElementMethod_2Lab.SLAE.Preconditions;
 using SharpMath;
 using SharpMath.Vectors;
+using System;
 
 namespace FiniteElementMethod_2Lab.SLAE.Solvers;
 

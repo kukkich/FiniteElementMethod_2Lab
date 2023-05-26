@@ -1,12 +1,12 @@
-﻿using System;
-using System.Linq;
-using FiniteElementMethod_2Lab.FEM.OneDimensional;
+﻿using FiniteElementMethod_2Lab.FEM.OneDimensional;
 using FiniteElementMethod_2Lab.Geometry;
 using FiniteElementMethod_2Lab.Geometry.Core;
 using FiniteElementMethod_2Lab.Geometry.Splitting;
 using FiniteElementMethod_2Lab.SLAE.Preconditions;
 using FiniteElementMethod_2Lab.SLAE.Solvers;
 using SharpMath.EquationsSystem.Preconditions.Diagonal;
+using System;
+using System.Linq;
 using static System.Math;
 namespace FiniteElementMethod_2Lab;
 
@@ -260,7 +260,7 @@ public static class AccuracyTests
             .SetSLAESolver(() => DefaultConfiguration, luPreconditioner, new LUSparse(luPreconditioner))
             .SetSigma(1)
             .SetDensityFunction((x, t) => -12 * Pow(2 * x + t, 2) + 1)
-            .SetLambdaBySolutionDependency(u => u * u * u)
+            .SetLambdaBySolutionDependency(u => Pow(u, 3))
             .SetFirstBoundary(0, t => U(0, t))
             .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
             .Build();

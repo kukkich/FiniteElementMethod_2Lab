@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using FiniteElementMethod_2Lab.FEM.Core.Assembling;
+﻿using FiniteElementMethod_2Lab.FEM.Core.Assembling;
 using FiniteElementMethod_2Lab.FEM.Core.Global;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
@@ -12,6 +9,9 @@ using FiniteElementMethod_2Lab.SLAE.Solvers;
 using SharpMath.EquationsSystem.Solver;
 using SharpMath.Matrices;
 using SharpMath.Vectors;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
 

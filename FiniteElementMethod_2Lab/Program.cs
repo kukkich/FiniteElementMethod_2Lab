@@ -1,10 +1,10 @@
-﻿using System;
+﻿using FiniteElementMethod_2Lab.FEM.Core;
+using FiniteElementMethod_2Lab.Geometry;
+using SharpMath.Vectors;
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
-using FiniteElementMethod_2Lab.FEM.Core;
-using FiniteElementMethod_2Lab.Geometry;
-using SharpMath.Vectors;
 
 namespace FiniteElementMethod_2Lab;
 
@@ -23,10 +23,10 @@ public class Program
         while (infrastructure.HasNextTime)
         {
             WriteSolution(infrastructure.CurrentSolution, infrastructure.CurrentTime);
-            infrastructure.NextTimeNewtonIteration();
+            infrastructure.NextTimeIteration();
         }
         WriteSolution(infrastructure.CurrentSolution, infrastructure.CurrentTime);
-        
+
         Console.WriteLine(infrastructure.IterationsNumber);
     }
 
@@ -40,21 +40,21 @@ public class Program
             //Console.WriteLine($"t = {t}");
             Console.ForegroundColor = ConsoleColor.White;
 
-            foreach (var x in new double[] {1/3d})
+            foreach (var x in new double[] { 1/3d })
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 //Console.WriteLine($"{x}");
                 Console.ForegroundColor = ConsoleColor.White;
-                
+
                 var u = solution.Calculate(x);
                 var expected = U(x, t);
                 Console.WriteLine($"{u:F15} {expected:F15}");
             }
-            
+
         }
         var step = Grid.Elements.First().Length;
         var start = Grid.Nodes.First();
-        
+
         // Console.ForegroundColor = ConsoleColor.Red;
         // Console.WriteLine($"t = {t}");
         // Console.ForegroundColor = ConsoleColor.White;

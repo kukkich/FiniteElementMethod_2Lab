@@ -2,7 +2,6 @@
 using SharpMath;
 using SharpMath.EquationsSystem.Solver;
 using SharpMath.Matrices;
-using SharpMath.Vectors;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
 
@@ -13,7 +12,7 @@ public class FiniteElementSolver
     private readonly FixedValue[] _firstBoundary;
 
     public FiniteElementSolver(
-        GlobalAssembler globalAssembler, 
+        GlobalAssembler globalAssembler,
         ConjugateGradientSolver SLAEsolver,
         FixedValue[] firstBoundary
         )

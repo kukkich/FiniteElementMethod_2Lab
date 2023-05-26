@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using FiniteElementMethod_2Lab.Geometry.Core;
+﻿using FiniteElementMethod_2Lab.Geometry.Core;
+using System.Collections.Generic;
 
 namespace FiniteElementMethod_2Lab.Geometry.Splitting;
 

@@ -1,7 +1,6 @@
-﻿using System;
-using System.Linq;
-using FiniteElementMethod_2Lab.Geometry;
+﻿using FiniteElementMethod_2Lab.Geometry;
 using SharpMath.Vectors;
+using System.Linq;
 
 namespace FiniteElementMethod_2Lab.FEM.Core;
 
@@ -19,7 +18,7 @@ public class FiniteElementSolution
     public double Calculate(double point)
     {
         var elem = _grid.Elements.First(x => ElementHas(x, point));
-        
+
         var leftIndex = elem.GetBoundNodeIndexes(Bound.Left);
         var rightIndex = elem.GetBoundNodeIndexes(Bound.Right);
 
@@ -31,7 +30,7 @@ public class FiniteElementSolution
         var qRight = _functionWeights[rightIndex];
 
         var step = right - left;
-        
+
         var sum = 0d;
         sum += qLeft * (right - point) / step;
         sum += qRight * (point - left) / step;

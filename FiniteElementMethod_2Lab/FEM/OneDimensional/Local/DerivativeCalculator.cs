@@ -4,7 +4,7 @@ namespace FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
 
 public class DerivativeCalculator
 {
-    private const double Delta = 1e-18d;
+    private const double Delta = 1e-3d;
 
     public static double CalculateDerivative(Func<double, double> function, double point)
     {

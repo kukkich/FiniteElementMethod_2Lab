@@ -1,10 +1,7 @@
 ﻿using FiniteElementMethod_2Lab.FEM.Core.Global;
-using FiniteElementMethod_2Lab.FEM.OneDimensional;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Global;
 using SharpMath;
-using SharpMath.EquationsSystem.Solver;
-using SharpMath.Matrices;
 
 namespace FiniteElementMethod_2Lab.SLAE.Solvers;
 

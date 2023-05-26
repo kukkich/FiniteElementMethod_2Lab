@@ -1,20 +1,19 @@
-﻿using SharpMath.EquationsSystem.Solver;
-using System;
-using System.Linq;
-using FiniteElementMethod_2Lab.FEM.Core;
-using SharpMath.Vectors;
+﻿using FiniteElementMethod_2Lab.FEM.Core;
 using FiniteElementMethod_2Lab.FEM.Core.Assembling;
 using FiniteElementMethod_2Lab.FEM.Core.Global;
-using FiniteElementMethod_2Lab.FEM.Core.Parameters;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Boundary;
-using FiniteElementMethod_2Lab.Geometry;
-using SharpMath.Matrices;
-using FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters.Providers;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Global;
+using FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
+using FiniteElementMethod_2Lab.Geometry;
 using FiniteElementMethod_2Lab.SLAE.Solvers;
 using SharpMath;
+using SharpMath.EquationsSystem.Solver;
+using SharpMath.Matrices;
+using SharpMath.Vectors;
+using System;
+using System.Linq;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional;
 
@@ -117,7 +116,7 @@ public class FEMInfrastructure
             );
 
             var equationNext = solverNext.Solve();
-  
+
             var Aq = LinAl.Multiply(equationNext.Matrix, equation.Solution);
 
             var AqMinusB = LinAl.Subtract(Aq, equationNext.RightSide);

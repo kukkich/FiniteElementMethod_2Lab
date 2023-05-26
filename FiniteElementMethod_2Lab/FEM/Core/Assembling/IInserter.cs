@@ -1,5 +1,4 @@
-﻿using SharpMath.Matrices;
-using SharpMath.Vectors;
+﻿using SharpMath.Vectors;
 
 namespace FiniteElementMethod_2Lab.FEM.Core.Assembling;
 

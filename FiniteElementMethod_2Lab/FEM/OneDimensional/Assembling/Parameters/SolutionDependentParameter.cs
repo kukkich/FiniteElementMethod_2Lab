@@ -1,8 +1,8 @@
-﻿using System;
-using FiniteElementMethod_2Lab.FEM.Core;
+﻿using FiniteElementMethod_2Lab.FEM.Core;
 using FiniteElementMethod_2Lab.FEM.Core.Parameters;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Local;
 using FiniteElementMethod_2Lab.Geometry;
+using System;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Parameters;
 
@@ -13,7 +13,7 @@ public class SolutionDependentParameter : IFunctionalParameter<double>
     private readonly Grid<double> _grid;
 
     public SolutionDependentParameter(
-        FiniteElementSolution solution, 
+        FiniteElementSolution solution,
         Func<double, double> solutionDependency,
         Grid<double> grid
     )
@@ -27,7 +27,7 @@ public class SolutionDependentParameter : IFunctionalParameter<double>
     {
         var node = _grid.Nodes[nodeIndex];
         var u = _solution.Calculate(node);
-        
+
         return _solutionDependency(u);
     }
 

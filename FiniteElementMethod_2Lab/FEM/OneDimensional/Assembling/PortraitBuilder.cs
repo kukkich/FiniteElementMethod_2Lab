@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using FiniteElementMethod_2Lab.FEM.Core;
+﻿using FiniteElementMethod_2Lab.FEM.Core;
 using FiniteElementMethod_2Lab.FEM.Core.Assembling;
 using FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling.Extensions;
 using SharpMath.Matrices;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FiniteElementMethod_2Lab.FEM.OneDimensional.Assembling;
 
