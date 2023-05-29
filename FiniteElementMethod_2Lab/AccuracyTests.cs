@@ -16,7 +16,7 @@ public static class AccuracyTests
     {
         PreconditionFactory = new DiagonalPreconditionerFactory(),
         MaxIteration = 1500,
-        Precision = 1e-15
+        Precision = 1e-20
     };
 
     public static FEMInfrastructure GetFirstTest()
@@ -260,7 +260,7 @@ public static class AccuracyTests
             .SetSLAESolver(() => DefaultConfiguration, luPreconditioner, new LUSparse(luPreconditioner))
             .SetSigma(1)
             .SetDensityFunction((x, t) => -12 * Pow(2 * x + t, 2) + 1)
-            .SetLambdaBySolutionDependency(u => Pow(u, 3))
+            .SetLambdaBySolutionDependency(u => u * u * u)
             .SetFirstBoundary(0, t => U(0, t))
             .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
             .Build();

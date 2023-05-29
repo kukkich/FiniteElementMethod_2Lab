@@ -23,7 +23,7 @@ public class Program
         while (infrastructure.HasNextTime)
         {
             WriteSolution(infrastructure.CurrentSolution, infrastructure.CurrentTime);
-            infrastructure.NextTimeIteration();
+            infrastructure.NextTimeNewtonIteration();
         }
         WriteSolution(infrastructure.CurrentSolution, infrastructure.CurrentTime);
 
@@ -48,7 +48,7 @@ public class Program
 
                 var u = solution.Calculate(x);
                 var expected = U(x, t);
-                Console.WriteLine($"{u:F15} {expected:F15}");
+                Console.WriteLine($"{u:E14} {Math.Abs(expected - u):E14}");
             }
 
         }

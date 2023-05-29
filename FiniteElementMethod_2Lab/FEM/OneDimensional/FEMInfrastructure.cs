@@ -124,7 +124,7 @@ public class FEMInfrastructure
             norm = AqMinusB.Norm / equationNext.RightSide.Norm;
             i++;
 
-        } while (norm > 1e-13 && i < 1000);
+        } while (norm > 1e-14 && i < 1000);
 
         IterationsNumber += i;
     }
@@ -168,7 +168,7 @@ public class FEMInfrastructure
 
             var AqMinusB = LinAl.Subtract(Aq, equationNext.RightSide);
 
-            norm = AqMinusB.Norm / equationNext.RightSide.Norm;
+            norm = AqMinusB.Norm / equationNext.Solution.Norm;
             i++;
 
         } while (norm > 1e-13 && i < 1000);
@@ -196,8 +196,9 @@ public class FEMInfrastructure
             stiffnessTemplateProvider: _stiffnessTemplateProvider,
             sigma: _sigma,
             densityFunctionProvider: _densityFunction,
-            previousTimeLayerSolution: solution,
-            timeStep: CurrentTime - _timeLayers[_currentTimeLayer - 1]
+            previousTimeLayerSolution: PreviousSolution,
+            timeStep: TimeStep,
+            currentTimeSolution: solution
         );
     }
 
@@ -221,8 +222,8 @@ public class FEMInfrastructure
             stiffnessTemplateProvider: _stiffnessTemplateProvider,
             sigma: _sigma,
             densityFunctionProvider: _densityFunction,
-            previousTimeLayerSolution: solution,
-            timeStep: CurrentTime - _timeLayers[_currentTimeLayer - 1]
+            previousTimeLayerSolution: PreviousSolution,
+            timeStep: TimeStep
         );
     }
 

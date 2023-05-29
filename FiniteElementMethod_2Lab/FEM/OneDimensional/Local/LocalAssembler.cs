@@ -14,7 +14,7 @@ public class LocalAssembler : ILocalAssembler
     protected readonly ITemplateMatrixProvider StiffnessTemplateProvider;
     private readonly IAttachedToElementParameterProvider<double> _sigma;
     private readonly IFunctionalParameter<double> _densityFunctionProvider;
-    protected readonly Vector PreviousTimeLayerSolution;
+    private readonly Vector _previousTimeLayerSolution;
     private readonly double _timeStep;
 
     public LocalAssembler(
@@ -32,7 +32,7 @@ public class LocalAssembler : ILocalAssembler
         StiffnessTemplateProvider = stiffnessTemplateProvider;
         _sigma = sigma;
         _densityFunctionProvider = densityFunctionProvider;
-        PreviousTimeLayerSolution = previousTimeLayerSolution;
+        _previousTimeLayerSolution = previousTimeLayerSolution;
         _timeStep = timeStep;
     }
 
@@ -96,7 +96,7 @@ public class LocalAssembler : ILocalAssembler
             var f = _densityFunctionProvider.Calculate(nodeIndex);
 
             var sigma = _sigma.GetById(element.MaterialId);
-            var q = PreviousTimeLayerSolution[nodeIndex];
+            var q = _previousTimeLayerSolution[nodeIndex];
             var timeImpact = q * sigma / (_timeStep);
 
             return f + timeImpact;
