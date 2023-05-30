@@ -16,7 +16,7 @@ public static class AccuracyTests
     {
         PreconditionFactory = new DiagonalPreconditionerFactory(),
         MaxIteration = 1500,
-        Precision = 1e-20
+        Precision = 1e-16
     };
 
     public static FEMInfrastructure GetFirstTest()
@@ -239,7 +239,7 @@ public static class AccuracyTests
 
         var xSplit = new AxisSplitParameter(
             new[] { 0d, 1d },
-            new UniformSplitter(2)
+            new UniformSplitter(5)
         );
 
         double[] time = new UniformSplitter(30)
@@ -259,8 +259,8 @@ public static class AccuracyTests
             .SetInitialWeights(GetInitialWeights(grid, U, time))
             .SetSLAESolver(() => DefaultConfiguration, luPreconditioner, new LUSparse(luPreconditioner))
             .SetSigma(1)
-            .SetDensityFunction((x, t) => -12 * Pow(2 * x + t, 2) + 1)
-            .SetLambdaBySolutionDependency(u => u * u * u)
+            .SetDensityFunction((x, t) => -16 * Pow(2 * x + t, 3) + 1)
+            .SetLambdaBySolutionDependency(u => Pow(u, 4))
             .SetFirstBoundary(0, t => U(0, t))
             .SetFirstBoundary(grid.Nodes.Length - 1, t => U(grid.Nodes[^1], t))
             .Build();

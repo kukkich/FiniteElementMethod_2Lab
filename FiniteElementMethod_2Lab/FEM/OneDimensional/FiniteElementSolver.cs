@@ -26,15 +26,12 @@ public class FiniteElementSolver
     {
         var equation = _globalAssembler.BuildEquation();
 
-        var a = equation.Matrix;
-
         _globalAssembler.ApplyFirstBoundaryConditions(equation, _firstBoundary);
 
         //.ApplySecondBoundaryConditions(equation, _secondBoundary);
         //     .ApplyThirdBoundaryConditions(equation, _thirdBoundary)
 
         _SLAEsolver.Solve(equation);
-
 
         return equation;
     }

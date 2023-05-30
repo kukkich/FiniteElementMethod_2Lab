@@ -124,7 +124,14 @@ public class FEMInfrastructure
             norm = AqMinusB.Norm / equationNext.RightSide.Norm;
             i++;
 
-        } while (norm > 1e-14 && i < 1000);
+        } while (norm > 1e-13 && i < 1000);
+        Console.Write($"time: {CurrentTime:F3} exit with norm: {norm:E6} total iterations: ");
+        if (i == 1000)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+        }
+        Console.WriteLine($"{i}");
+        Console.ResetColor();
 
         IterationsNumber += i;
     }
@@ -172,6 +179,13 @@ public class FEMInfrastructure
             i++;
 
         } while (norm > 1e-13 && i < 1000);
+        Console.Write($"time: {CurrentTime:F3} exit with norm: {norm:E6} total iterations: ");
+        if (i == 1000)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+        }
+        Console.WriteLine($"{i}");
+        Console.ResetColor();
 
         IterationsNumber += i;
     }

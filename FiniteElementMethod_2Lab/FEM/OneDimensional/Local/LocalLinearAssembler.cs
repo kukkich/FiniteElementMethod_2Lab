@@ -1,4 +1,5 @@
-﻿using FiniteElementMethod_2Lab.FEM.Core;
+﻿using System;
+using FiniteElementMethod_2Lab.FEM.Core;
 using FiniteElementMethod_2Lab.FEM.Core.Assembling;
 using FiniteElementMethod_2Lab.FEM.Core.Parameters;
 using SharpMath;
